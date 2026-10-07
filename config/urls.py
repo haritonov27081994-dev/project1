@@ -1,8 +1,7 @@
 """
 URL configuration for config project.
-
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.1/topics/http/urls/
+    https://djangoproject.com
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -15,9 +14,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import include, path
+
+# Временная функция для отображения текста на главной странице
+def home_page_view(request):
+    return HttpResponse("<h1>Главная страница</h1>")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('blog.urls')),  # Подключаем маршруты нашего блога к корню сайта
+    path('blog/', include('blog.urls')), # Подключаем маршруты блога по адресу /blog/
+    path('', home_page_view),            # Отображаем нашу функцию на главной странице (корень сайта)
 ]
