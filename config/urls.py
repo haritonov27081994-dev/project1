@@ -14,15 +14,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.http import HttpResponse
 from django.urls import include, path
-
-# Временная функция для отображения текста на главной странице
-def home_page_view(request):
-    return HttpResponse("<h1>Главная страница</h1>")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('blog/', include('blog.urls')), # Подключаем маршруты блога по адресу /blog/
-    path('', home_page_view),            # Отображаем нашу функцию на главной странице (корень сайта)
+    path('', include('blog.urls')),
 ]
