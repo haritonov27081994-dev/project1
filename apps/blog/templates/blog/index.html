@@ -6,6 +6,12 @@
   <title>CryBloga</title>
 </head>
 <body>
+  <header>
+    <nav>
+      <a href="{% url 'blog:home_page' %}">Главная</a>
+      <a href="{% url 'blog:post_list' %}">Посты</a>
+    </nav>
+  </header>
   <h1>Главная страница</h1>
 </body>
 </html>
