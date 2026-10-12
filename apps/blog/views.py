@@ -19,9 +19,24 @@ def post_detail_view(request, post_id):
 def post_add_view(request):
     if request.method == "GET":
         return render(request, 'blog/post_add.html')
+        
     elif request.method == "POST":
-        post = Post.objects.create(
-            title=request.POST['title'],
-            text=request.POST['text']
-        )
+        title = request.POST['title'].strip()
+        text = request.POST['text'].strip()
+        
+        errors = {}
+        if not title:
+            errors['title'] = 'Заголовок поста обязателен к заполнению.'
+        if not text:
+            errors['text'] = 'Текст поста обязателен к заполнению.'
+            
+        if errors:
+            context = {
+                'errors': errors,
+                'title': title,
+                'text': text
+            }
+            return render(request, 'blog/post_add.html', context)
+            
+        post = Post.objects.create(title=title, text=text)
         return redirect('blog:post_detail', post_id=post.id)
