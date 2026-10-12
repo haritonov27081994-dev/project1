@@ -6,5 +6,6 @@ app_name = 'blog'
 urlpatterns = [
     path('', views.home_page_view, name="home_page"),
     path('posts/', views.post_list_view, name="post_list"),
-    path('posts/<int:post_id>/', views.post_detail_view, name='post_detail'),# Добавить эту строку
+    path('posts/<int:post_id>/', views.post_detail_view, name='post_detail'),
+    path('posts/add/', views.post_add_view, name='post_add'),
 ]
