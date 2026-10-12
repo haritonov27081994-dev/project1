@@ -17,10 +17,8 @@ def post_detail_view(request, post_id):
 
 
 def post_add_view(request):
-    if request.method == "GET":
-        return render(request, 'blog/post_add.html')
-        
-    elif request.method == "POST":
+    # 1. Если данные отправлены методом POST, обрабатываем их
+    if request.method == "POST":
         title = request.POST['title'].strip()
         text = request.POST['text'].strip()
         
@@ -40,3 +38,6 @@ def post_add_view(request):
             
         post = Post.objects.create(title=title, text=text)
         return redirect('blog:post_detail', post_id=post.id)
+        
+    # 2. Если это обычный переход на страницу (GET), просто отдаем пустую форму
+    return render(request, 'blog/post_add.html')
