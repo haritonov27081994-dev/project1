@@ -17,7 +17,7 @@
           </a>
         </h2>
         <p>Текст поста: {{ post.text }}</p>
-        <small>Дата создания поста: {{ post.created_at }}</small>
+        <small>Дата создания поста: {{ post.created_at|date:"d.m.Y H:i" }}</small>
       </div>
     {% endfor %}
   {% else %}
