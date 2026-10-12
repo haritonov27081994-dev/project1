@@ -1,23 +1,15 @@
-<!doctype html>
-<html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CryBloga | {{ post.title }}</title>
-  </head>
-  <body>
-    <header>
-      <nav>
-        <a href="{% url 'blog:home_page' %}">Главная</a>
-        <a href="{% url 'blog:post_list' %}">Посты</a>
-      </nav>
-    </header>
-    <br />
-    <a href="javascript:history.back()">&larr; Назад</a>
-    <h1>Детали поста:</h1>
-    <h2>ID поста: {{ post.id }}</h2>
-    <h3>{{ post.title }}</h3>
-    <p>{{ post.text }}</p>
-    <p>{{ post.created_at }}</p>
-  </body>
-</html>
+{% extends "blog/base.html" %}
+
+{% block page_title %}
+  CryBloga | {{ post.title }}
+{% endblock page_title %}
+
+{% block page_content %}
+  <a href="javascript:history.back()">&larr; Назад</a>
+
+  <h1>Детали поста:</h1>
+  <h2>ID поста: {{ post.id }}</h2>
+  <h3>{{ post.title }}</h3>
+  <p>{{ post.text }}</p>
+  <p>{{ post.created_at }}</p>
+{% endblock page_content %}
