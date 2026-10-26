@@ -18,15 +18,17 @@ def post_detail_view(request, post_id):
 
 
 def post_add_view(request):
+    # Создаем форму один раз: если POST — с данными, если GET — пустую
+    form = PostForm(request.POST or None)
+
     if request.method == "POST":
-        form = PostForm(request.POST)
         if form.is_valid():
             post = Post.objects.create(
                 title=form.cleaned_data['title'],
                 text=form.cleaned_data['text']
             )
             return redirect('blog:post_detail', post_id=post.id)
-        return render(request, 'blog/pages/post_add.html', {"form": form})
-        
-    form = PostForm()
+
+    # Этот рендер сработает и для GET-запроса (отдаст пустую форму), 
+    # и для POST-запроса, если форма не прошла валидацию (отдаст форму с ошибками)
     return render(request, 'blog/pages/post_add.html', {"form": form})
