@@ -12,10 +12,6 @@
   
   <br>
   <a href="{% url 'blog:post_edit' post_id=post.id %}">Редактировать</a>
-  
   <br><br>
-  <form method="POST" action="{% url 'blog:post_remove' post_id=post.id %}">
-    {% csrf_token %}
-    <button type="submit">Удалить</button>
-  </form>
+  <a href="{% url 'blog:post_remove' post_id=post.id %}">Удалить</a>
 {% endblock page_content %}

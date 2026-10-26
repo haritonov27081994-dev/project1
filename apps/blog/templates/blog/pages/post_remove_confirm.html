@@ -1,0 +1,17 @@
+{% extends "blog/base.html" %}
+
+{% block page_title %}
+  CryBloga | Подтверждение удаления поста
+{% endblock page_title %}
+
+{% block page_content %}
+  <h1>Подтверждение</h1>
+  <p>Вы уверены, что хотите удалить пост "<strong>{{ post.title }}</strong>"?</p>
+  
+  <form method="POST">
+    {% csrf_token %}
+    <button type="submit">Да, удалить</button>
+  </form>
+  <br>
+  <a href="{% url 'blog:post_detail' post.id %}">Отмена</a>
+{% endblock page_content %}
