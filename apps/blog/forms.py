@@ -1,21 +1,25 @@
 from django import forms
+from .models import Post  # Относительный импорт модели
 
-class PostForm(forms.Form):
-    title = forms.CharField(
-        max_length=200,
-        label="Заголовок поста:",
-        widget=forms.TextInput(attrs={
-            'placeholder': "Максимальная длина 200 символов"
-        })
-    )
-    text = forms.CharField(
-        label="Текст поста:",
-        widget=forms.Textarea(attrs={
-            'rows': 3,
-            'cols': 20
-        })
-    )
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ['title', 'text']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'placeholder': "Максимальная длина 200 символов"
+            }),
+            'text': forms.Textarea(attrs={
+                'rows': 3,
+                'cols': 20
+            })
+        }
+        labels = {
+            'title': 'Заголовок поста:',
+            'text': 'Текст поста:'
+        }
 
+    # Валидация заголовка полностью сохраняется
     def clean_title(self):
         title = self.cleaned_data['title'].strip()
         if len(title) < 10:
