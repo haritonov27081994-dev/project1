@@ -6,12 +6,37 @@
 
 {% block page_content %}
   <h1>Новый пост</h1>
+
   <form method="POST" novalidate>
     {% csrf_token %}
 
-    {{ form }}
+    {# Вариант 1 #}
+    {% comment %} {{ form }} {% endcomment %}
     {% comment %} {{ form.as_div }} {% endcomment %}
     {% comment %} {{ form.as_p }} {% endcomment %}
+
+    {# Вариант 2 #}
+    {% for field in form %}
+      <div>
+        {{ field.label_tag }}
+        {{ field }}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+
+    {# Вариант 3 #}
+    {% comment %}
+    <div>
+      {{ form.title.label_tag }}
+      {{ form.title }}
+      {{ form.title.errors }}
+    </div>
+    <div>
+      {{ form.text.label_tag }}
+      {{ form.text }}
+      {{ form.text.errors }}
+    </div>
+    {% endcomment %}
 
     <button type="submit">Добавить</button>
   </form>
