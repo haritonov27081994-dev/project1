@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect, render
-from blog.models import Post
+from .models import Post
+from .forms import PostForm
 
 
 def home_page_view(request):
@@ -17,27 +18,15 @@ def post_detail_view(request, post_id):
 
 
 def post_add_view(request):
-    # 1. Если данные отправлены методом POST, обрабатываем их
     if request.method == "POST":
-        title = request.POST['title'].strip()
-        text = request.POST['text'].strip()
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = Post.objects.create(
+                title=form.cleaned_data['title'],
+                text=form.cleaned_data['text']
+            )
+            return redirect('blog:post_detail', post_id=post.id)
+        return render(request, 'blog/pages/post_add.html', {"form": form})
         
-        errors = {}
-        if not title:
-            errors['title'] = 'Заголовок поста обязателен к заполнению.'
-        if not text:
-            errors['text'] = 'Текст поста обязателен к заполнению.'
-            
-        if errors:
-            context = {
-                'errors': errors,
-                'title': title,
-                'text': text
-            }
-            return render(request, 'blog/pages/post_add.html', context)
-            
-        post = Post.objects.create(title=title, text=text)
-        return redirect('blog:post_detail', post_id=post.id)
-        
-    # 2. Если это обычный переход на страницу (GET), просто отдаем пустую форму
-    return render(request, 'blog/pages/post_add.html')
+    form = PostForm()
+    return render(request, 'blog/pages/post_add.html', {"form": form})
