@@ -1,0 +1,21 @@
+{% extends "blog/base.html" %}
+
+{% block page_title %}
+  CryBloga | Редактировать пост
+{% endblock page_title %}
+
+{% block page_content %}
+  <h1>Редактирование</h1>
+  <form method="POST" novalidate>
+    {% csrf_token %}
+    {% for field in form %}
+      <div>
+        {{ field.label_tag }}
+        {{ field }}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+    <br>
+    <button type="submit">Сохранить</button>
+  </form>
+{% endblock page_content %}

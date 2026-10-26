@@ -5,11 +5,11 @@
 {% endblock page_title %}
 
 {% block page_content %}
-  <a href="javascript:history.back()">&larr; Назад</a>
-
-  <h1>Детали поста:</h1>
   <h2>ID поста: {{ post.id }}</h2>
   <h3>{{ post.title }}</h3>
   <p>{{ post.text }}</p>
-  <p>Дата публикации: {{ post.created_at|date:"d.m.Y H:i" }}</p>
+  <p>{{ post.created_at|date:"d.m.Y H:i" }}</p>
+  
+  <br>
+  <a href="{% url 'blog:post_edit' post_id=post.id %}">Редактировать</a>
 {% endblock page_content %}

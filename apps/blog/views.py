@@ -22,7 +22,23 @@ def post_add_view(request):
 
     if request.method == "POST":
         if form.is_valid():
-            post = form.save()  # Автоматически сохраняет пост в БД и возвращает созданный объект
+            post = form.save()
             return redirect('blog:post_detail', post_id=post.id)
 
     return render(request, 'blog/pages/post_add.html', {"form": form})
+
+
+def post_edit_view(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    
+    if request.method == "POST":
+        # Передаем и новые данные из запроса, и сам изменяемый объект поста
+        form = PostForm(request.POST, instance=post)
+        if form.is_valid():
+            form.save()  # Обновляет поля поста в базе данных
+            return redirect("blog:post_detail", post_id=post.id)
+        return render(request, 'blog/pages/post_edit.html', context={"form": form})
+        
+    # При GET-запросе передаем только instance, чтобы поля заполнились текущим текстом
+    form = PostForm(instance=post)
+    return render(request, 'blog/pages/post_edit.html', context={"form": form})
