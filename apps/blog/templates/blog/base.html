@@ -1,6 +1,5 @@
-{% load static %}
-{% load django_bootstrap5 %}
-{% load bootstrap_icons %}
+{% load static %} {% load django_bootstrap5 %} {% load bootstrap_icons %}
+
 <!doctype html>
 <html lang="ru">
   <head>
@@ -10,35 +9,43 @@
 
     <link rel="icon" href="{% static 'images/favicon.png' %}" />
 
-    <!-- Автоматические стили Bootstrap 5 -->
     {% bootstrap_css %}
 
-    <!-- Твой локальный файл стилей -->
     <link rel="stylesheet" href="{% static 'blog/css/base.css' %}" />
-    {% block styles %}{% endblock styles %}
-
-    <!-- Автоматические скрипты Bootstrap 5 -->
-    {% bootstrap_javascript %}
+    {% block styles %}{% endblock styles %} {% bootstrap_javascript %}
   </head>
   <body>
     <header>
       <nav class="navbar navbar-expand-sm bg-dark" data-bs-theme="dark">
         <div class="container-fluid">
           <a class="navbar-brand" href="{% url 'blog:home_page' %}">CryBloga</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
               <li class="nav-item">
-                <!-- Изменили вывод иконки домика на встроенный тег библиотеки -->
-                <a class="nav-link" href="{% url 'blog:home_page' %}">{% bs_icon 'house-door-fill' %} Главная</a>
+                <a class="nav-link" href="{% url 'blog:home_page' %}"
+                  >{% bs_icon 'house' extra_classes='me-1' %}Главная</a
+                >
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'blog:post_list' %}">Посты</a>
+                <a class="nav-link" href="{% url 'blog:post_list' %}"
+                  >{% bs_icon 'file-richtext' extra_classes='me-1' %}Посты</a
+                >
               </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'blog:post_add' %}">Добавить пост</a>
+                          <li class="nav-item">
+              <a class="nav-link" href="{% url 'blog:post_add' %}">{% bs_icon 'plus-square-dotted' extra_classes='me-1' %}Добавить пост</a>
+            </li>
+
               </li>
             </ul>
           </div>
