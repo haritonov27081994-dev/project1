@@ -1,15 +1,20 @@
 {% extends "blog/base.html" %}
+{% load static %}
 
 {% block page_title %}
   CryBloga | Все посты
 {% endblock page_title %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static 'blog/css/pages/post_list.css' %}">
+{% endblock styles %}
 
 {% block page_content %}
   <h1>Все посты</h1>
 
   {% if posts %}
     {% for post in posts %}
-      <div class="post-container" style="background-color: crimson; color: white; border: 1px solid black; margin-bottom: 10px; padding: 15px;">
+      <div class="post-container">
         <h2>
           Заголовок поста:
           <a href="{% url 'blog:post_detail' post_id=post.id %}" style="color: white;">
@@ -24,4 +29,3 @@
     <p>Постов ещё нет. Загляните позже!</p>
   {% endif %}
 {% endblock page_content %}
-
