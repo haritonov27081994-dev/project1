@@ -7,8 +7,13 @@
     <title>{% block page_title %}{% endblock page_title %}</title>
 
     <link rel="icon" href="{% static 'images/favicon.png' %}" />
+    
+    <link rel="stylesheet" href="https://jsdelivr.net">
+    
     <link rel="stylesheet" href="{% static 'blog/css/base.css' %}" />
     {% block styles %}{% endblock styles %}
+    
+    <script src="https://jsdelivr.net"></script>
   </head>
   <body>
     <header>
