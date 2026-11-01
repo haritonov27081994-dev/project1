@@ -10,13 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 import sys
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Строка, которая уже есть в твоем файле:
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-sys.path.insert(0, str(BASE_DIR / 'apps'))
+# ДОБАВЬ ЭТУ СТРОКУ СРАЗУ ПОД BASE_DIR:
+sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -46,6 +48,7 @@ INSTALLED_APPS = [
     
     # Собственные
     'blog',
+    'users',
 ]
 
 MIDDLEWARE = [
