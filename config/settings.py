@@ -47,8 +47,8 @@ INSTALLED_APPS = [
     'django_bootstrap_icons',
     
     # Собственные
-    'blog',
-    'users',
+    'apps.blog',
+    'apps.users',
 ]
 
 MIDDLEWARE = [

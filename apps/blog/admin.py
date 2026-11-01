@@ -1,5 +1,6 @@
 from django.contrib import admin
-from blog.models import Post
+from .models import Post  # Обязательно должна быть точка перед models!
 
-# Register your models here.
-admin.site.register(Post)
+@admin.register(Post)
+class PostAdmin(admin.ModelAdmin):
+    pass
