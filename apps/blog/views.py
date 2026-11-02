@@ -1,14 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-
-# Используем абсолютный импорт через корень apps, настроенный в settings.py
-from blog.models import Post
-from blog.forms import PostForm
+from .models import Post
+from .forms import PostForm
+from django.views.decorators.http import require_POST
 
 def home_page_view(request):
     """Главная страница блога."""
     posts = Post.objects.all().order_by('-created_at')[:5]
-    return render(request, 'blog/pages/home.html', {'posts': posts})
+    return render(request, 'blog/pages/index.html', {'posts': posts})
 
 def post_list_view(request):
     """Страница со списком всех постов."""
@@ -30,7 +29,7 @@ def post_add_view(request):
             post.author = request.user
             post.save()
             return redirect('blog:post_list')
-    return render(request, 'blog/pages/post_add.html', {'form': form})
+    return render(request, 'blog/pages/post_form.html', {'form': form})
 
 @login_required
 def post_edit_view(request, post_id):
@@ -41,4 +40,10 @@ def post_edit_view(request, post_id):
         if form.is_valid():
             form.save()
             return redirect('blog:post_detail', post_id=post.id)
-    return render(request, 'blog/pages/post_edit.html', {'form': form, 'post': post})
+    return render(request, 'blog/pages/post_form.html', {'form': form, 'post': post})
+
+@require_POST
+def post_remove_view(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    post.delete()
+    return redirect('blog:post_list')
