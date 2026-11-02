@@ -1,85 +1,61 @@
-{% load bootstrap_icons %} {% load static %}
-<!doctype html>
+{% load bootstrap_icons %}
+{% load static %}
+<!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block page_title %}CryBloga{% endblock page_title %}</title>
     <!-- Подключаем Favicon (PNG) -->
-    <link
-      rel="icon"
-      type="image/png"
-      href="{% static 'images/favicon.png' %}"
-    />
-    <!-- Прямое подключение CSS Bootstrap через CDN -->
-    <link href="https://jsdelivr.net" rel="stylesheet" />
-  </head>
-  <body>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <!-- ЛОКАЛЬНОЕ подключение CSS Bootstrap (Вариант 2) -->
+    <link rel="stylesheet" href="{% static 'blog/css/bootstrap.min.css' %}">
+</head>
+<body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
       <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'blog:home_page' %}">CryBloga</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-        >
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <!-- Левая часть меню -->
           <ul class="navbar-nav me-auto">
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'blog:home_page' %}"
-                >{% bs_icon 'house' extra_classes='me-1' %}Главная</a
-              >
+              <a class="nav-link" href="{% url 'blog:home_page' %}">{% bs_icon 'house' extra_classes='me-1' %}Главная</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'blog:post_list' %}"
-                >{% bs_icon 'list-task' extra_classes='me-1' %}Все посты</a
-              >
+              <a class="nav-link" href="{% url 'blog:post_list' %}">{% bs_icon 'list-task' extra_classes='me-1' %}Все посты</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'blog:post_add' %}"
-                >{% bs_icon 'plus-square-dotted' extra_classes='me-1' %}Добавить
-                пост</a
-              >
+              <a class="nav-link" href="{% url 'blog:post_add' %}">{% bs_icon 'plus-square-dotted' extra_classes='me-1' %}Добавить пост</a>
             </li>
           </ul>
           <!-- Правая часть меню: Авторизация и Выход -->
           <ul class="navbar-nav align-items-center">
             {% if request.user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link disabled" href="#"
-                >Привет, {{ request.user }}</a
-              >
-            </li>
-            <li class="nav-item">
-              <form
-                method="POST"
-                action="{% url 'users:logout' %}"
-                class="d-inline"
-              >
-                {% csrf_token %}
-                <button
-                  type="submit"
-                  class="btn nav-link border-0 p-0 m-0 align-baseline"
-                >
-                  {% bs_icon 'box-arrow-left' extra_classes='me-1' %}Выйти
-                </button>
-              </form>
-            </li>
+              <li class="nav-item">
+                <a class="nav-link disabled" href="#">Привет, {{ request.user }}</a>
+              </li>
+              <li class="nav-item">
+                <form method="POST" action="{% url 'users:logout' %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn nav-link border-0 p-0 m-0 align-baseline">
+                    {% bs_icon 'box-arrow-left' extra_classes='me-1' %}Выйти
+                  </button>
+                </form>
+              </li>
             {% else %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'users:login' %}">
-                {% bs_icon 'door-closed' extra_classes='me-1' %}Войти
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'users:register' %}">
-                {% bs_icon 'person-add' extra_classes='me-1' %}Регистрация
-              </a>
-            </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'users:login' %}">
+                  {% bs_icon 'door-closed' extra_classes='me-1' %}Войти
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'users:register' %}">
+                  {% bs_icon 'person-add' extra_classes='me-1' %}Регистрация
+                </a>
+              </li>
             {% endif %}
           </ul>
         </div>
@@ -87,10 +63,11 @@
     </nav>
 
     <div class="container">
-      {% block page_content %} {% endblock page_content %}
+        {% block page_content %}
+        {% endblock page_content %}
     </div>
 
-    <!-- Прямое подключение JS Bootstrap через CDN -->
-    <script src="https://jsdelivr.net"></script>
-  </body>
+    <!-- ЛОКАЛЬНОЕ подключение JS Bootstrap (Вариант 2) -->
+    <script src="{% static 'blog/js/bootstrap.bundle.min.js' %}"></script>
+</body>
 </html>
