@@ -17,6 +17,11 @@
             <a href="{% url 'blog:post_detail' post.id %}" class="text-dark text-decoration-none">
               Заголовок поста: <span class="text-secondary">{{ post.title }}</span>
             </a>
+            
+            <!-- Проверка на автора поста для вывода бейджа -->
+            {% if request.user == post.author %}
+              <span class="badge bg-primary fs-6 align-middle ms-2">Мой пост</span>
+            {% endif %}
           </h2>
           
           <p class="card-text text-dark mb-4 fs-5" style="line-height: 1.6;">
