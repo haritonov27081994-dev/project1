@@ -8,8 +8,13 @@
     <title>{% block page_title %}CryBloga{% endblock page_title %}</title>
     <!-- Подключаем Favicon (PNG) -->
     <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
-    <!-- ЛОКАЛЬНОЕ подключение CSS Bootstrap (Вариант 2) -->
+    <!-- ЛОКАЛЬНОЕ подключение CSS Bootstrap -->
     <link rel="stylesheet" href="{% static 'blog/css/bootstrap.min.css' %}">
+    <!-- Исправлено: Путь к глобальным стилям через приложение blog -->
+    <link rel="stylesheet" href="{% static 'blog/css/base.css' %}">
+    {% block styles %}{% endblock styles %}
+    <!-- Исправлено: Путь к главному JS-модулю через приложение blog -->
+    <script src="{% static 'blog/js/base.js' %}" type="module" defer></script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
@@ -45,7 +50,7 @@
                   <button type="submit" class="btn nav-link border-0 p-0 m-0 align-baseline">
                     {% bs_icon 'box-arrow-left' extra_classes='me-1' %}Выйти
                   </button>
-                </form>
+                </form> 
               </li>
             {% else %}
               <li class="nav-item">
@@ -65,11 +70,20 @@
     </nav>
 
     <div class="container">
-        {% block page_content %}
-        {% endblock page_content %}
+        <main>
+          {% block page_content %}
+          {% endblock page_content %}
+        </main>
     </div>
 
-    <!-- ЛОКАЛЬНОЕ подключение JS Bootstrap (Вариант 2) -->
+    <footer>&copy; Все права защищены 2026</footer>
+
+    <!-- Динамическая кнопка прокрутки наверх -->
+    <button id="scrollToTopBtn" class="scroll-to-top disabled">
+      {% bs_icon 'arrow-up' size="25px" %}
+    </button>
+
+    <!-- ЛОКАЛЬНОЕ подключение JS Bootstrap -->
     <script src="{% static 'blog/js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>
