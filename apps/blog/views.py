@@ -46,6 +46,10 @@ def post_edit_view(request, post_id):
     """Страница редактирования существующего поста."""
     post = get_object_or_404(Post, id=post_id)
     
+    # Защита: редактировать может только автор
+    if request.user != post.author:
+        return render(request, 'blog/pages/not_allowed.html')
+        
     extra_context = {
         "title": "Редактировать пост",
         "h1": "Редактирование",
@@ -80,6 +84,10 @@ def post_edit_view(request, post_id):
 def post_remove_view(request, post_id):
     """Страница удаления поста с подтверждением."""
     post = get_object_or_404(Post, id=post_id)
+
+    # Защита: удалять может только автор
+    if request.user != post.author:
+        return render(request, 'blog/pages/not_allowed.html')
 
     if request.method == "POST":
         post.delete()
