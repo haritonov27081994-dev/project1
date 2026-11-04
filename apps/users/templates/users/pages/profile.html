@@ -1,35 +1,26 @@
 {% extends "blog/base.html" %}
-{% load static %}
 
 {% block page_title %}
   CryBloga | Профиль
 {% endblock page_title %}
 
-{% block styles %}
-  <link rel="stylesheet" href="{% static 'users/css/pages/profile.css' %}">
-{% endblock styles %}
-
 {% block page_content %}
-  {% if user == request.user %}
-    <h1>Мой профиль</h1>
-  {% else %}
-    <h1>Профиль пользователя {{ user }}</h1>
-  {% endif %}
-
-  {% if posts %}
-    {% for post in posts %}
-      <div class="post-container">
-        <h2>
-          Заголовок поста:
-          <a href="{% url 'blog:post_detail' post_id=post.id %}">
-            {{ post.title }}
-          </a>
-        </h2>
-        <p>Текст поста: {{ post.text }}</p>
-        <small>Дата создания поста: {{ post.created_at|date:"d.m.Y H:i" }}</small>
-      </div>
-    {% endfor %}
-  {% else %}
-    <p>Постов ещё нет. Загляните позже!</p>
-  {% endif %}
+<div class="row mt-4">
+  <div class="col-md-8 mx-auto">
+    <h1>
+      {% if profile_user == request.user %}
+        Мой профиль
+      {% else %}
+        Профиль пользователя {{ profile_user }}
+      {% endif %}
+    </h1>
+    <div class="mt-4">
+      {% for post in posts %}
+        {% include 'blog/includes/post_container.html' %}
+      {% empty %}
+        <p class="text-muted fs-5">Постов ещё нет. Загляните позже!</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
 {% endblock page_content %}

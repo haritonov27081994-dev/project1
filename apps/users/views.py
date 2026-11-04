@@ -43,7 +43,7 @@ def profile_view(request, username):
     user = get_object_or_404(User, username=username)
     posts = user.posts.all()
     context = {
-        'user': user,
+        'profile_user': user,  # Заменили 'user' на 'profile_user' для стабильности шаблонов
         'posts': posts
     }
     return render(request, 'users/pages/profile.html', context)
