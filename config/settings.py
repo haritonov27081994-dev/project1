@@ -142,5 +142,4 @@ mimetypes.add_type("text/javascript", ".js", True)
 # URL-адрес, куда перенаправлять гостей при попытке зайти на защищенную страницу
 LOGIN_URL = 'users:login'
 
-# Имя маршрута для редиректа по умолчанию после успешного входа
-DEFAULT_LOGIN_REDIRECT_URL = 'blog:home_page'
+DEFAULT_LOGIN_REDIRECT_URL = 'users:profile'

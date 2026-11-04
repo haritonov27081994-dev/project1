@@ -1,0 +1,7 @@
+.post-container {
+  background-color: crimson;
+  color: white;
+  border: 1px solid black;
+  margin-bottom: 10px; 
+  padding: 15px;
+}
