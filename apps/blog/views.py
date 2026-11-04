@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Post
 from .forms import PostForm
-from django.views.decorators.http import require_POST
 
 def home_page_view(request):
     """Главная страница блога."""
@@ -23,27 +22,67 @@ def post_detail_view(request, post_id):
 def post_add_view(request):
     """Страница добавления нового поста."""
     form = PostForm(request.POST or None)
+    
     if request.method == "POST":
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
             post.save()
-            return redirect('blog:post_list')
-    return render(request, 'blog/pages/post_form.html', {'form': form})
+            return redirect('blog:post_detail', post_id=post.id)
+
+    return render(
+        request,
+        'blog/pages/post_form.html',
+        {
+            "form": form,
+            "title": "Добавить пост",
+            "h1": "Новый пост",
+            "submit_button_text": "Добавить",
+        }
+    )
 
 @login_required
 def post_edit_view(request, post_id):
     """Страница редактирования существующего поста."""
     post = get_object_or_404(Post, id=post_id)
-    form = PostForm(request.POST or None, instance=post)
+    
+    extra_context = {
+        "title": "Редактировать пост",
+        "h1": "Редактирование",
+        "submit_button_text": "Сохранить",
+    }
+
     if request.method == "POST":
+        form = PostForm(request.POST, instance=post)
         if form.is_valid():
             form.save()
-            return redirect('blog:post_detail', post_id=post.id)
-    return render(request, 'blog/pages/post_form.html', {'form': form, 'post': post})
+            return redirect("blog:post_detail", post_id=post.id)
+        return render(
+            request,
+            'blog/pages/post_form.html',
+            context={
+                "form": form,
+                **extra_context,
+            }
+        )
 
-@require_POST
+    form = PostForm(instance=post)
+    return render(
+        request,
+        'blog/pages/post_form.html',
+        context={
+            "form": form,
+            **extra_context,
+        }
+    )
+
+@login_required
 def post_remove_view(request, post_id):
+    """Страница удаления поста с подтверждением."""
     post = get_object_or_404(Post, id=post_id)
-    post.delete()
-    return redirect('blog:post_list')
+
+    if request.method == "POST":
+        post.delete()
+        return redirect("blog:post_list")
+
+    return render(request, 'blog/pages/post_remove_confirm.html', {'post': post})
