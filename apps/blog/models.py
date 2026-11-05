@@ -5,7 +5,7 @@ User = get_user_model()
 
 class Post(models.Model):
     title = models.CharField(max_length=200, verbose_name="Заголовок")
-    image = models.ImageField(upload_to="post_images/", null=True)  # Добавлено поле для картинок
+    image = models.ImageField(upload_to="post_images/", null=True, blank=True)
     text = models.TextField(verbose_name="Текст")
     created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(
