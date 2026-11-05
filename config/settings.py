@@ -125,6 +125,9 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media/'
+
 # Место, куда Django соберет файлы при команде collectstatic (нужно для продакшена)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
