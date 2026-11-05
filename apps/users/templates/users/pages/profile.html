@@ -20,7 +20,9 @@
     </h1>
     <div class="mt-4">
       {% for post in posts %}
-        {% include 'blog/includes/post_container.html' %}
+        {% if profile_user == request.user or post.status != 'draft' %}
+          {% include 'blog/includes/post_container.html' %}
+        {% endif %}
       {% empty %}
         <p class="text-muted fs-5">Постов ещё нет. Загляните позже!</p>
       {% endfor %}

@@ -1,21 +1,31 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from .models import Post
 from .forms import PostForm
 
 def home_page_view(request):
     """Главная страница блога."""
-    posts = Post.objects.all().order_by('-created_at')[:5]
+    # Показываем на главной только опубликованные посты
+    posts = Post.objects.filter(status="published").order_by('-created_at')[:5]
     return render(request, 'blog/pages/index.html', {'posts': posts})
 
 def post_list_view(request):
     """Страница со списком всех постов."""
-    posts = Post.objects.all().order_by('-created_at')
+    # Выводим только опубликованные посты
+    posts = Post.objects.filter(status="published").order_by('-created_at')
     return render(request, 'blog/pages/post_list.html', {'posts': posts})
 
 def post_detail_view(request, post_id):
-    """Страница детального просмотра одного поста."""
-    post = get_object_or_404(Post, id=post_id)
+    """Страница детального просмотра одного поста с защитой черновиков."""
+    if request.user.is_authenticated:
+        # Авторизованный пользователь видит пост, если он опубликован ИЛИ если он его автор
+        condition = Q(id=post_id) & (Q(status="published") | Q(author=request.user))
+    else:
+        # Неавторизованный видит только опубликованные
+        condition = Q(id=post_id) & Q(status="published")
+        
+    post = get_object_or_404(Post, condition)
     return render(request, 'blog/pages/post_detail.html', {'post': post})
 
 @login_required
