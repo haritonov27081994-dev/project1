@@ -4,6 +4,10 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class Post(models.Model):
+    STATUS_CHOICES = (
+        ('published', 'Опубликован'),
+        ('draft', 'Черновик')
+    )
     title = models.CharField(max_length=200, verbose_name="Заголовок")
     image = models.ImageField(upload_to="post_images/", null=True, blank=True)
     text = models.TextField(verbose_name="Текст")
@@ -13,6 +17,7 @@ class Post(models.Model):
         on_delete=models.CASCADE,
         related_name='posts'
     )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft', verbose_name="Статус")
 
     class Meta:
         ordering = ['-created_at']
