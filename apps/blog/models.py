@@ -21,6 +21,7 @@ class Post(models.Model):
     )
     tags = models.ManyToManyField("Tag", related_name='posts', blank=True, verbose_name='Теги')
     image = models.ImageField(upload_to="post_images/", null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
     text = models.TextField(verbose_name="Текст")
     created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(
