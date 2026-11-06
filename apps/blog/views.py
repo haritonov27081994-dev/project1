@@ -6,24 +6,20 @@ from .forms import PostForm
 
 def home_page_view(request):
     """Главная страница блога."""
-    # Показываем на главной только опубликованные посты
     posts = Post.objects.filter(status="published").order_by('-created_at')[:5]
     return render(request, 'blog/pages/index.html', {'posts': posts})
 
 def post_list_view(request):
     """Страница со списком всех постов."""
-    # Выводим только опубликованные посты
     posts = Post.objects.filter(status="published").order_by('-created_at')
     return render(request, 'blog/pages/post_list.html', {'posts': posts})
 
-def post_detail_view(request, post_id):
-    """Страница детального просмотра одного поста с защитой черновиков."""
+def post_detail_view(request, post_slug):
+    """Страница детального просмотра одного поста по его слагу с защитой черновиков."""
     if request.user.is_authenticated:
-        # Авторизованный пользователь видит пост, если он опубликован ИЛИ если он его автор
-        condition = Q(id=post_id) & (Q(status="published") | Q(author=request.user))
+        condition = Q(slug=post_slug) & (Q(status="published") | Q(author=request.user))
     else:
-        # Неавторизованный видит только опубликованные
-        condition = Q(id=post_id) & Q(status="published")
+        condition = Q(slug=post_slug) & Q(status="published")
         
     post = get_object_or_404(Post, condition)
     return render(request, 'blog/pages/post_detail.html', {'post': post})
@@ -38,7 +34,7 @@ def post_add_view(request):
             post = form.save(commit=False)
             post.author = request.user
             post.save()
-            return redirect('blog:post_detail', post_id=post.id)
+            return redirect('blog:post_detail', post_slug=post.slug)
 
     return render(
         request,
@@ -53,10 +49,9 @@ def post_add_view(request):
 
 @login_required
 def post_edit_view(request, post_id):
-    """Страница редактирования существующего поста."""
+    """Страница редактирования существующего поста по его ID."""
     post = get_object_or_404(Post, id=post_id)
     
-    # Защита: редактировать может только автор
     if request.user != post.author:
         return render(request, 'blog/pages/not_allowed.html')
         
@@ -70,7 +65,7 @@ def post_edit_view(request, post_id):
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
             form.save()
-            return redirect("blog:post_detail", post_id=post.id)
+            return redirect("blog:post_detail", post_slug=post.slug)
         return render(
             request,
             'blog/pages/post_form.html',
@@ -95,7 +90,6 @@ def post_remove_view(request, post_id):
     """Страница удаления поста с подтверждением."""
     post = get_object_or_404(Post, id=post_id)
 
-    # Защита: удалять может только автор
     if request.user != post.author:
         return render(request, 'blog/pages/not_allowed.html')
 
