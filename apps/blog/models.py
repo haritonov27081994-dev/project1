@@ -12,6 +12,12 @@ class Post(models.Model):
     )
     title = models.CharField(max_length=200, verbose_name="Заголовок")
     slug = models.SlugField(max_length=200, unique=True, editable=False, verbose_name="Слаг")
+    category = models.ForeignKey(
+        'Category',
+        related_name='posts',
+        on_delete=models.CASCADE,
+        verbose_name="Категория"
+    )
     image = models.ImageField(upload_to="post_images/", null=True, blank=True)
     text = models.TextField(verbose_name="Текст")
     created_at = models.DateTimeField(auto_now_add=True)
