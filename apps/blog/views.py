@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from .models import Post, Category
+from .models import Post, Category, Tag
 from .forms import PostForm
 
 def home_page_view(request):
@@ -24,6 +24,16 @@ def category_posts_view(request, category_slug):
     }
     return render(request, 'blog/pages/category_posts.html', context)
 
+def tag_posts_view(request, tag_slug):
+    """Страница со списком опубликованных постов с определенным тегом."""
+    tag = get_object_or_404(Tag, slug=tag_slug)
+    posts = tag.posts.filter(status='published').order_by('-created_at')
+    context = {
+        'tag': tag,
+        'posts': posts
+    }
+    return render(request, 'blog/pages/tag_posts.html', context)
+
 def post_detail_view(request, post_slug):
     """Страница детального просмотра одного поста по его слагу с защитой черновиков."""
     if request.user.is_authenticated:
@@ -44,7 +54,7 @@ def post_add_view(request):
             post = form.save(commit=False)
             post.author = request.user
             post.save()
-            form.save_m2m()  # Критически важно для сохранения связей ManyToMany (тегов)!
+            form.save_m2m()
             return redirect('blog:post_detail', post_slug=post.slug)
 
     return render(
@@ -75,7 +85,7 @@ def post_edit_view(request, post_id):
     if request.method == "POST":
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
-            form.save()  # Здесь save_m2m() вызывается автоматически самим Django, так как commit=False не используется
+            form.save()
             return redirect("blog:post_detail", post_slug=post.slug)
         return render(
             request,
