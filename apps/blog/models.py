@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from django.utils.text import slugify
 from unidecode import unidecode
 
@@ -32,6 +33,9 @@ class Post(models.Model):
         ordering = ['-created_at']
         verbose_name = 'пост'
         verbose_name_plural = 'посты'
+
+    def get_absolute_url(self):
+        return reverse('blog:post_detail', kwargs={'post_slug': self.slug})
 
     def save(self, *args, **kwargs):
         if not self.slug:

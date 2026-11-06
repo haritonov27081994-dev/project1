@@ -1,11 +1,12 @@
 <div class="card shadow-sm mb-4 border-0 bg-light">
   <div class="card-body p-4">
     <h2 class="card-title h4 fw-semibold mb-3">
-      <a href="{% url 'blog:post_detail' post_slug=post.slug %}" class="text-dark text-decoration-none">
+      <a href="{{ post.get_absolute_url }}" class="text-dark text-decoration-none">
         Заголовок поста: <span class="text-secondary">{{ post.title }}</span>
       </a>
+      <!-- Жесткая проверка: бейдж видит только автор поста -->
       {% if request.user.is_authenticated and request.user == post.author %}
-        <span class="badge bg-primary fs-6 align-middle ms-2">Мой post</span>
+        <span class="badge bg-primary fs-6 align-middle ms-2">Мой пост</span>
       {% endif %}
     </h2>
     
