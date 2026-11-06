@@ -36,7 +36,7 @@ def post_detail_view(request, post_slug):
 
 @login_required
 def post_add_view(request):
-    """Страница добавления нового поста."""
+    """Страница добавления нового поста с поддержкой сохранения тегов."""
     form = PostForm(request.POST or None, request.FILES or None)
     
     if request.method == "POST":
@@ -44,6 +44,7 @@ def post_add_view(request):
             post = form.save(commit=False)
             post.author = request.user
             post.save()
+            form.save_m2m()  # Критически важно для сохранения связей ManyToMany (тегов)!
             return redirect('blog:post_detail', post_slug=post.slug)
 
     return render(
@@ -74,7 +75,7 @@ def post_edit_view(request, post_id):
     if request.method == "POST":
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
-            form.save()
+            form.save()  # Здесь save_m2m() вызывается автоматически самим Django, так как commit=False не используется
             return redirect("blog:post_detail", post_slug=post.slug)
         return render(
             request,
