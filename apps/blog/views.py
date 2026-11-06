@@ -46,7 +46,7 @@ def post_detail_view(request, post_slug):
 
 @login_required
 def post_add_view(request):
-    """Страница добавления нового поста с поддержкой сохранения тегов."""
+    """Страница добавления нового поста с текстовым вводом тегов."""
     form = PostForm(request.POST or None, request.FILES or None)
     
     if request.method == "POST":
@@ -55,6 +55,13 @@ def post_add_view(request):
             post.author = request.user
             post.save()
             form.save_m2m()
+            
+            # Обработка и автоматическое создание текстовых тегов
+            tag_names = form.cleaned_data.get('tags_input')
+            for tag_name in tag_names:
+                tag, _ = Tag.objects.get_or_create(name=tag_name)
+                post.tags.add(tag)
+                
             return redirect('blog:post_detail', post_slug=post.slug)
 
     return render(
@@ -70,7 +77,7 @@ def post_add_view(request):
 
 @login_required
 def post_edit_view(request, post_id):
-    """Страница редактирования существующего поста по его ID."""
+    """Страница редактирования существующего поста с текстовым вводом тегов."""
     post = get_object_or_404(Post, id=post_id)
     
     if request.user != post.author:
@@ -86,6 +93,14 @@ def post_edit_view(request, post_id):
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
             form.save()
+            
+            # Обновление текстовых тегов при редактировании
+            post.tags.clear()
+            tag_names = form.cleaned_data.get('tags_input')
+            for tag_name in tag_names:
+                tag, _ = Tag.objects.get_or_create(name=tag_name)
+                post.tags.add(tag)
+                
             return redirect("blog:post_detail", post_slug=post.slug)
         return render(
             request,
@@ -96,7 +111,9 @@ def post_edit_view(request, post_id):
             }
         )
 
-    form = PostForm(instance=post)
+    # Передаем существующие теги поста строкой через запятую в форму
+    existing_tags = ", ".join(tag.name for tag in post.tags.all())
+    form = PostForm(instance=post, initial={'tags_input': existing_tags})
     return render(
         request,
         'blog/pages/post_form.html',
