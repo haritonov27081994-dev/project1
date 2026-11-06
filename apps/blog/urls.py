@@ -6,8 +6,8 @@ app_name = 'blog'
 urlpatterns = [
     path('', views.home_page_view, name="home_page"),
     path('posts/', views.post_list_view, name="post_list"),
-    path('posts/<slug:post_slug>/', views.post_detail_view, name='post_detail'),
-    path('posts/add/', views.post_add_view, name='post_add'),
+    path('posts/add/', views.post_add_view, name='post_add'),  # Сначала проверяем статический путь "add/"
+    path('posts/<slug:post_slug>/', views.post_detail_view, name='post_detail'),  # Потом динамический слаг
     path('posts/<int:post_id>/edit/', views.post_edit_view, name="post_edit"),
     path('posts/<int:post_id>/remove/', views.post_remove_view, name="post_remove"),
 ]

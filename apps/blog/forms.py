@@ -4,11 +4,12 @@ from .models import Post  # Относительный импорт модели
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'text', 'image']
+        fields = ['title', 'category', 'text', 'image']
         widgets = {
             'title': forms.TextInput(attrs={
                 'placeholder': "Максимальная длина 200 символов"
             }),
+            'category': forms.Select(attrs={'class': 'form-control'}),
             'text': forms.Textarea(attrs={
                 'rows': 3,
                 'cols': 20
@@ -17,6 +18,7 @@ class PostForm(forms.ModelForm):
         }
         labels = {
             'title': 'Заголовок поста:',
+            'category': 'Категория:',
             'text': 'Текст поста:',
             'image': 'Картинка поста'
         }
