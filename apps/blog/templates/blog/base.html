@@ -29,19 +29,31 @@
             <li class="nav-item">
               <a class="nav-link {% if request.resolver_match.url_name == 'home_page' %}active{% endif %}" 
                  href="{% url 'blog:home_page' %}">
-                {% bs_icon 'house' extra_classes='me-1' %}Главная
+                {% if request.resolver_match.url_name == 'home_page' %}
+                  {% bs_icon 'house-fill' extra_classes='me-1' %}
+                {% else %}
+                  {% bs_icon 'house' extra_classes='me-1' %}
+                {% endif %}Главная
               </a>
             </li>
             <li class="nav-item">
               <a class="nav-link {% if request.resolver_match.url_name == 'post_list' %}active{% endif %}" 
                  href="{% url 'blog:post_list' %}">
-                {% bs_icon 'list-task' extra_classes='me-1' %}Все посты
+                {% if request.resolver_match.url_name == 'post_list' %}
+                  {% bs_icon 'file-text-fill' extra_classes='me-1' %}
+                {% else %}
+                  {% bs_icon 'file-text' extra_classes='me-1' %}
+                {% endif %}Все посты
               </a>
             </li>
             <li class="nav-item">
               <a class="nav-link {% if request.resolver_match.url_name == 'post_add' %}active{% endif %}" 
                  href="{% url 'blog:post_add' %}">
-                {% bs_icon 'plus-square-dotted' extra_classes='me-1' %}Добавить пост
+                {% if request.resolver_match.url_name == 'post_add' %}
+                  {% bs_icon 'plus-square-fill' extra_classes='me-1' %}
+                {% else %}
+                  {% bs_icon 'plus-square-dotted' extra_classes='me-1' %}
+                {% endif %}Добавить пост
               </a>
             </li>
           </ul>
@@ -51,7 +63,11 @@
               <li class="nav-item">
                 <a class="nav-link {% if request.resolver_match.url_name == 'profile' and request.resolver_match.kwargs.username == request.user.username %}active{% endif %}" 
                    href="{% url 'users:profile' username=request.user.username %}">
-                  {% bs_icon 'person' extra_classes='me-1' %}{{ request.user }}
+                  {% if request.resolver_match.url_name == 'profile' and request.resolver_match.kwargs.username == request.user.username %}
+                    {% bs_icon 'person-fill' extra_classes='me-1' %}
+                  {% else %}
+                    {% bs_icon 'person' extra_classes='me-1' %}
+                  {% endif %}{{ request.user }}
                 </a>
               </li>
               <li class="nav-item ms-2">
@@ -66,13 +82,21 @@
               <li class="nav-item">
                 <a class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}" 
                    href="{% url 'users:login' %}">
-                  {% bs_icon 'door-closed' extra_classes='me-1' %}Войти
+                  {% if request.resolver_match.url_name == 'login' %}
+                    {% bs_icon 'door-open-fill' extra_classes='me-1' %}
+                  {% else %}
+                    {% bs_icon 'door-closed' extra_classes='me-1' %}
+                  {% endif %}Войти
                 </a>
               </li>
               <li class="nav-item">
                 <a class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}" 
                    href="{% url 'users:register' %}">
-                  {% bs_icon 'person-add' extra_classes='me-1' %}Регистрация
+                  {% if request.resolver_match.url_name == 'register' %}
+                    {% bs_icon 'person-fill-add' extra_classes='me-1' %}
+                  {% else %}
+                    {% bs_icon 'person-add' extra_classes='me-1' %}
+                  {% endif %}Регистрация
                 </a>
               </li>
             {% endif %}
