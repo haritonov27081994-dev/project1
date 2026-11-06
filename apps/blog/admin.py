@@ -1,6 +1,10 @@
 from django.contrib import admin
-from .models import Post  # Обязательно должна быть точка перед models!
+from .models import Post, Category
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
     pass
