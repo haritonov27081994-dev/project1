@@ -22,6 +22,9 @@ class PostForm(forms.ModelForm):
             'text': 'Текст поста:',
             'image': 'Картинка поста'
         }
+        help_texts = {
+            'category': "- можно выбрать только одну категорию"
+        }
 
     # Валидация заголовка полностью сохраняется
     def clean_title(self):

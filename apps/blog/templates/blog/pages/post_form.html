@@ -11,10 +11,13 @@
     {% csrf_token %}
 
     {% for field in form %}
-      <div>
+      <div class="mb-3">
         {{ field.label_tag }}
         {{ field }}
         {{ field.errors }}
+        {% if field.help_text %}
+          <div class="form-text text-muted">{{ field.help_text }}</div>
+        {% endif %}
       </div>
     {% endfor %}
 
