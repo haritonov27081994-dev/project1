@@ -39,19 +39,13 @@ class Post(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            # Сначала генерируем базовый слаг из заголовка
             base_slug = slugify(unidecode(self.title))
             slug = base_slug
             counter = 1
-            
-            # Проверяем, есть ли уже пост с таким слагом. 
-            # Если есть — добавляем к слагу дефис и цифру, пока не найдем свободный
             while Post.objects.filter(slug=slug).exists():
                 slug = f"{base_slug}-{counter}"
                 counter += 1
-                
             self.slug = slug
-            
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -65,6 +59,9 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'категория'
         verbose_name_plural = "категории"
+
+    def get_absolute_url(self):
+        return reverse('blog:category_posts', kwargs={'category_slug': self.slug})
 
     def save(self, *args, **kwargs):
         if not self.slug:
