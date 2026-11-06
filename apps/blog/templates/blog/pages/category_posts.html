@@ -1,0 +1,27 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+{% block page_title %}
+  CryBloga | Посты в категории {{ category.name }}
+{% endblock page_title %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static 'blog/css/includes/post_container.css' %}">
+{% endblock styles %}
+
+{% block page_content %}
+<div class="row mt-4">
+  <div class="col-md-8 mx-auto">
+    <a href="javascript:history.back()" class="text-decoration-none">&larr; Назад</a>
+    <h1 class="mt-2 mb-4">Посты в категории: <span class="text-primary">{{ category.name }}</span></h1>
+    
+    {% if posts %}
+      {% for post in posts %}
+        {% include 'blog/includes/post_container.html' %}
+      {% endfor %}
+    {% else %}
+      <p class="text-muted fs-5">В этой категории пока нет постов.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock page_content %}

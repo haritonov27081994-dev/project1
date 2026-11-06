@@ -11,6 +11,8 @@
   {% if request.user == post.author %}
     <p>Статус: {{ post.get_status_display }}</p>
   {% endif %}
+
+  <p>Категория: <a href="{% url 'blog:category_posts' category_slug=post.category.slug %}">{{ post.category.name }}</a></p>
   
   {% if post.image %}
     <img src="{{ post.image.url }}" alt="Картинка поста">

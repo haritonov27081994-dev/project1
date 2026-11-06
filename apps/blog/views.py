@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from .models import Post
+from .models import Post, Category
 from .forms import PostForm
 
 def home_page_view(request):
@@ -13,6 +13,16 @@ def post_list_view(request):
     """Страница со списком всех постов."""
     posts = Post.objects.filter(status="published").order_by('-created_at')
     return render(request, 'blog/pages/post_list.html', {'posts': posts})
+
+def category_posts_view(request, category_slug):
+    """Страница со списком опубликованных постов конкретной категории."""
+    category = get_object_or_404(Category, slug=category_slug)
+    posts = category.posts.filter(status='published').order_by('-created_at')
+    context = {
+        'category': category,
+        'posts': posts
+    }
+    return render(request, 'blog/pages/category_posts.html', context)
 
 def post_detail_view(request, post_slug):
     """Страница детального просмотра одного поста по его слагу с защитой черновиков."""
