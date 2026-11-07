@@ -62,7 +62,6 @@ class PostDetailView(DetailView):
     context_object_name = 'post'
 
     def get_queryset(self):
-        # Пост доступен, если он опубликован или если текущий пользователь является его автором
         if self.request.user.is_authenticated:
             return Post.objects.filter(
                 Q(status="published") | Q(author=self.request.user)
@@ -70,35 +69,30 @@ class PostDetailView(DetailView):
         return Post.objects.filter(status="published")
 
 
-
-class PostCreateView(LoginRequiredMixin, CreateView):
-    """Страница добавления нового поста с автоматической обработкой текстовых тегов."""
-    model = Post
+class PostAddView(LoginRequiredMixin, CreateView):
+    """Страница добавления нового поста из урока (с защитой дублей тегов)."""
     form_class = PostForm
+    extra_context = {
+        "title": "Добавить пост",
+        "h1": "Новый пост",
+        "submit_button_text": "Добавить"
+    }
     template_name = 'blog/pages/post_form.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
-            "title": "Добавить пост",
-            "h1": "Новый пост",
-            "submit_button_text": "Добавить",
-        })
-        return context
-
     def form_valid(self, form):
-        form.instance.author = self.request.user
-        response = super().form_valid(form)
-        
+        post = form.save(commit=False)
+        post.author = self.request.user
+        post.save()
+
         tag_names = form.cleaned_data.get('tags_input', [])
         for tag_name in tag_names:
             tag, _ = Tag.objects.get_or_create(
                 name__iexact=tag_name, 
                 defaults={'name': tag_name}
             )
-            self.object.tags.add(tag)
-            
-        return response
+            post.tags.add(tag)
+
+        return redirect('blog:post_detail', post_slug=post.slug)
 
 
 class PostEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
