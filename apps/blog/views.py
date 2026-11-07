@@ -1,4 +1,4 @@
-from django.shortcuts import redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
@@ -17,20 +17,19 @@ class HomePageView(ListView):
 
 
 class PostListView(ListView):
-    """Страница со списком всех опубликованных постов (в стиле урока через queryset)."""
+    """Страница со списком всех опубликованных постов."""
     queryset = Post.objects.filter(status="published").order_by('-created_at')
     context_object_name = 'posts'
     template_name = 'blog/pages/post_list.html'
 
 
 class CategoryPostsView(ListView):
-    """Страница со списком постов конкретной категории."""
-    model = Post
-    template_name = 'blog/pages/category_posts.html'
+    """Страница со списком постов конкретной категории (безопасный поиск из урока)."""
     context_object_name = 'posts'
+    template_name = 'blog/pages/category_posts.html'
 
     def get_queryset(self):
-        self.category = Category.objects.get(slug=self.kwargs['category_slug'])
+        self.category = get_object_or_404(Category, slug=self.kwargs['category_slug'])
         return self.category.posts.filter(status='published').order_by('-created_at')
 
     def get_context_data(self, **kwargs):
@@ -46,7 +45,7 @@ class TagPostsView(ListView):
     context_object_name = 'posts'
 
     def get_queryset(self):
-        self.tag = Tag.objects.get(slug=self.kwargs['tag_slug'])
+        self.tag = get_object_or_404(Tag, slug=self.kwargs['tag_slug'])
         return self.tag.posts.filter(status='published').order_by('-created_at')
 
     def get_context_data(self, **kwargs):
@@ -67,7 +66,6 @@ class PostDetailView(DetailView):
             condition = Q(slug=self.kwargs['post_slug']) & (Q(status="published") | Q(author=self.request.user))
         else:
             condition = Q(slug=self.kwargs['post_slug']) & Q(status="published")
-        from django.shortcuts import get_object_or_404
         return get_object_or_404(Post, condition)
 
 
