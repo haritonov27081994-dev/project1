@@ -55,18 +55,20 @@ class TagPostsView(ListView):
 
 
 class PostDetailView(DetailView):
-    """Страница детального просмотра одного поста по его слагу с защитой черновиков."""
+    """Страница детального просмотра одного поста по его слагу с защитой черновиков из урока."""
     model = Post
+    slug_url_kwarg = 'post_slug'
     template_name = 'blog/pages/post_detail.html'
     context_object_name = 'post'
-    slug_url_kwarg = 'post_slug'
 
-    def get_object(self, queryset=None):
+    def get_queryset(self):
+        # Пост доступен, если он опубликован или если текущий пользователь является его автором
         if self.request.user.is_authenticated:
-            condition = Q(slug=self.kwargs['post_slug']) & (Q(status="published") | Q(author=self.request.user))
-        else:
-            condition = Q(slug=self.kwargs['post_slug']) & Q(status="published")
-        return get_object_or_404(Post, condition)
+            return Post.objects.filter(
+                Q(status="published") | Q(author=self.request.user)
+            )
+        return Post.objects.filter(status="published")
+
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
