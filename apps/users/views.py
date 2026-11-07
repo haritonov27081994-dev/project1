@@ -2,18 +2,17 @@ from django.conf import settings
 from django.contrib.auth import login, logout, get_user_model
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
+from django.views.generic import CreateView
 
 User = get_user_model()
 
-def register_view(request):
-    """Регистрация нового пользователя."""
-    form = UserCreationForm(request.POST or None)
-    if request.method == "POST":
-        if form.is_valid():
-            form.save()
-            return redirect('users:login')  # Сохранено: отправка на логин
-    return render(request, 'users/pages/register.html', {'form': form})
+class RegisterView(CreateView):
+    """Регистрация нового пользователя на основе CBV"""
+    template_name = 'users/pages/register.html'
+    form_class = UserCreationForm
+    success_url = reverse_lazy('users:login')
 
 def login_view(request):
     """Вход в аккаунт с поддержкой умного редиректа next."""
@@ -24,7 +23,6 @@ def login_view(request):
             # Читаем параметр next из URL, если его нет — перенаправляем на дефолтный URL
             next_url = request.GET.get('next', settings.DEFAULT_LOGIN_REDIRECT_URL)
             
-            # Интеграция из урока: если перенаправляем на профиль, добавляем username
             if next_url == settings.DEFAULT_LOGIN_REDIRECT_URL:
                 return redirect(next_url, username=request.user.username)
                 
@@ -43,7 +41,7 @@ def profile_view(request, username):
     user = get_object_or_404(User, username=username)
     posts = user.posts.all()
     context = {
-        'profile_user': user,  # Заменили 'user' на 'profile_user' для стабильности шаблонов
+        'profile_user': user,  # Сохранено: имя переменной для стабильности шаблонов
         'posts': posts
     }
     return render(request, 'users/pages/profile.html', context)
