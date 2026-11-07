@@ -95,45 +95,39 @@ class PostAddView(LoginRequiredMixin, CreateView):
         return redirect('blog:post_detail', post_slug=post.slug)
 
 
-class PostEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    """Страница редактирования существующего поста по его ID."""
+class PostEditView(UpdateView):
+    """Страница редактирования существующего поста строго по архитектуре урока."""
     model = Post
+    pk_url_kwarg = 'post_id'
     form_class = PostForm
     template_name = 'blog/pages/post_form.html'
-    pk_url_kwarg = 'post_id'
 
-    def test_func(self):
-        post = self.get_object()
-        return self.request.user == post.author
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if request.user != self.object.author:
+            return render(request, 'blog/pages/not_allowed.html')
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update({
-            "title": "Редактировать пост",
-            "h1": "Редактирование",
-            "submit_button_text": "Сохранить",
-        })
+        context['title'] = "Редактировать пост"
+        context['h1'] = "Редактирование"
+        context['submit_button_text'] = "Сохранить"
+        context['form'].fields['tags_input'].initial = ", ".join(tag.name for tag in self.object.tags.all())
         return context
 
-    def get_initial(self):
-        initial = super().get_initial()
-        initial['tags_input'] = ", ".join(tag.name for tag in self.get_object().tags.all())
-        return initial
-
     def form_valid(self, form):
-        response = super().form_valid(form)
-        post = self.object
-        
-        post.tags.clear()
+        form.save()
+        self.object.tags.clear()
         tag_names = form.cleaned_data.get('tags_input', [])
         for tag_name in tag_names:
+            # Наша регистронезависимая защита
             tag, _ = Tag.objects.get_or_create(
                 name__iexact=tag_name, 
                 defaults={'name': tag_name}
             )
-            post.tags.add(tag)
-            
-        return response
+            self.object.tags.add(tag)
+        return redirect('blog:post_detail', post_slug=self.object.slug)
 
 
 class PostRemoveView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
