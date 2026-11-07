@@ -2,9 +2,9 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.views import LoginView as AuthLoginView, LogoutView as AuthLogoutView
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, DetailView
 
 User = get_user_model()
 
@@ -28,16 +28,21 @@ class LoginView(AuthLoginView):
 
 
 class LogoutView(AuthLogoutView):
-    """Выход из аккаунта на основе встроенного LogoutView Django из урока."""
+    """Выход из аккаунта на основе встроенного LogoutView Django."""
     next_page = reverse_lazy('blog:home_page')
 
 
-def profile_view(request, username):
-    """Страница профиля пользователя со списком его постов."""
-    user = get_object_or_404(User, username=username)
-    posts = user.posts.all()
-    context = {
-        'profile_user': user,
-        'posts': posts
-    }
-    return render(request, 'users/pages/profile.html', context)
+class ProfileView(DetailView):
+    """Страница профиля пользователя со списком его постов из урока (с поддержкой верстки)."""
+    model = User
+    slug_url_kwarg = 'username'
+    slug_field = 'username'
+    template_name = 'users/pages/profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Добавляем список постов автора с твоей сортировкой (от новых к старым)
+        context['posts'] = self.object.posts.all().order_by('-created_at')
+        # Сохраняем имя переменной profile_user для идеальной стабильности твоих шаблонов
+        context['profile_user'] = self.object
+        return context
