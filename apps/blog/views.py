@@ -17,13 +17,10 @@ class HomePageView(ListView):
 
 
 class PostListView(ListView):
-    """Страница со списком всех опубликованных постов."""
-    model = Post
-    template_name = 'blog/pages/post_list.html'
+    """Страница со списком всех опубликованных постов (в стиле урока через queryset)."""
+    queryset = Post.objects.filter(status="published").order_by('-created_at')
     context_object_name = 'posts'
-
-    def get_queryset(self):
-        return Post.objects.filter(status="published").order_by('-created_at')
+    template_name = 'blog/pages/post_list.html'
 
 
 class CategoryPostsView(ListView):
@@ -69,7 +66,7 @@ class PostDetailView(DetailView):
         if self.request.user.is_authenticated:
             condition = Q(slug=self.kwargs['post_slug']) & (Q(status="published") | Q(author=self.request.user))
         else:
-            condition = Q(slug=post_slug) & Q(status="published")
+            condition = Q(slug=self.kwargs['post_slug']) & Q(status="published")
         from django.shortcuts import get_object_or_404
         return get_object_or_404(Post, condition)
 
@@ -93,7 +90,6 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         form.instance.author = self.request.user
         response = super().form_valid(form)
         
-        # Исправленный регистронезависимый поиск и создание тегов
         tag_names = form.cleaned_data.get('tags_input', [])
         for tag_name in tag_names:
             tag, _ = Tag.objects.get_or_create(
@@ -127,7 +123,6 @@ class PostEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_initial(self):
         initial = super().get_initial()
-        # Выводим оригинальные имена тегов из базы данных
         initial['tags_input'] = ", ".join(tag.name for tag in self.get_object().tags.all())
         return initial
 
@@ -138,7 +133,6 @@ class PostEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         post.tags.clear()
         tag_names = form.cleaned_data.get('tags_input', [])
         for tag_name in tag_names:
-            # Исправленный регистронезависимый поиск и создание тегов
             tag, _ = Tag.objects.get_or_create(
                 name__iexact=tag_name, 
                 defaults={'name': tag_name}
