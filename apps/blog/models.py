@@ -87,7 +87,14 @@ class Tag(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(unidecode(self.name))
+            # Защита уникальности слагов для тегов
+            base_slug = slugify(unidecode(self.name))
+            slug = base_slug
+            counter = 1
+            while Tag.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
         super().save(*args, **kwargs)
 
     def __str__(self):
