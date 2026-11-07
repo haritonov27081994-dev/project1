@@ -130,13 +130,16 @@ class PostEditView(UpdateView):
         return redirect('blog:post_detail', post_slug=self.object.slug)
 
 
-class PostRemoveView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-    """Страница удаления поста с подтверждением."""
+class PostRemoveView(DeleteView):
+    """Страница удаления поста с подтверждением строго по архитектуре урока."""
     model = Post
-    template_name = 'blog/pages/post_remove_confirm.html'
     pk_url_kwarg = 'post_id'
+    template_name = 'blog/pages/post_remove_confirm.html'
     success_url = reverse_lazy('blog:post_list')
 
-    def test_func(self):
-        post = self.get_object()
-        return self.request.user == post.author
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if request.user != self.object.author:
+            return render(request, 'blog/pages/not_allowed.html')
+        return super().dispatch(request, *args, **kwargs)
+
