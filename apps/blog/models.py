@@ -30,6 +30,7 @@ class Post(models.Model):
         related_name='posts'
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft', verbose_name="Статус")
+    views = models.PositiveIntegerField(default=0, verbose_name="Просмотры")
 
     class Meta:
         ordering = ['-created_at']
@@ -87,7 +88,6 @@ class Tag(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            # Защита уникальности слагов для тегов
             base_slug = slugify(unidecode(self.name))
             slug = base_slug
             counter = 1
