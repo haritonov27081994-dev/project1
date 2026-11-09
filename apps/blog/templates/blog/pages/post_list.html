@@ -19,6 +19,9 @@
         <p class="text-muted fs-5">Постов пока нет. Будьте первым, кто добавит пост!</p>
       </div>
     {% endfor %}
+    
+    {# Подключаем блок постраничной навигации #}
+    {% include "blog/includes/pagination.html" %}
   </div>
 </div>
 {% endblock %}

@@ -17,16 +17,18 @@ class HomePageView(ListView):
 
 
 class PostListView(ListView):
-    """Страница со списком всех опубликованных постов."""
+    """Страница со списком всех опубликованных постов с пагинацией из урока."""
     queryset = Post.objects.filter(status="published").order_by('-created_at')
     context_object_name = 'posts'
     template_name = 'blog/pages/post_list.html'
+    paginate_by = 3  # Количество постов на одной странице
 
 
 class CategoryPostsView(ListView):
-    """Страница со списком постов конкретной категории (безопасный поиск из урока)."""
+    """Страница со списком постов конкретной категории с пагинацией."""
     context_object_name = 'posts'
     template_name = 'blog/pages/category_posts.html'
+    paginate_by = 3
 
     def get_queryset(self):
         self.category = get_object_or_404(Category, slug=self.kwargs['category_slug'])
@@ -39,10 +41,11 @@ class CategoryPostsView(ListView):
 
 
 class TagPostsView(ListView):
-    """Страница со списком постов с определенным тегом."""
+    """Страница со списком постов с определенным тегом с пагинацией."""
     model = Post
     template_name = 'blog/pages/tag_posts.html'
     context_object_name = 'posts'
+    paginate_by = 3
 
     def get_queryset(self):
         self.tag = get_object_or_404(Tag, slug=self.kwargs['tag_slug'])
@@ -70,7 +73,7 @@ class PostDetailView(DetailView):
 
 
 class PostAddView(LoginRequiredMixin, CreateView):
-    """Страница добавления нового поста из урока (с защитой дублей тегов)."""
+    """Страница добавления нового поста из урока."""
     form_class = PostForm
     extra_context = {
         "title": "Добавить пост",
@@ -96,7 +99,7 @@ class PostAddView(LoginRequiredMixin, CreateView):
 
 
 class PostEditView(UpdateView):
-    """Страница редактирования существующего поста строго по архитектуре урока."""
+    """Страница редактирования существующего поста по его ID."""
     model = Post
     pk_url_kwarg = 'post_id'
     form_class = PostForm
@@ -121,7 +124,6 @@ class PostEditView(UpdateView):
         self.object.tags.clear()
         tag_names = form.cleaned_data.get('tags_input', [])
         for tag_name in tag_names:
-            # Наша регистронезависимая защита
             tag, _ = Tag.objects.get_or_create(
                 name__iexact=tag_name, 
                 defaults={'name': tag_name}
@@ -130,16 +132,13 @@ class PostEditView(UpdateView):
         return redirect('blog:post_detail', post_slug=self.object.slug)
 
 
-class PostRemoveView(DeleteView):
-    """Страница удаления поста с подтверждением строго по архитектуре урока."""
+class PostRemoveView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """Страница удаления поста с подтверждением."""
     model = Post
-    pk_url_kwarg = 'post_id'
     template_name = 'blog/pages/post_remove_confirm.html'
+    pk_url_kwarg = 'post_id'
     success_url = reverse_lazy('blog:post_list')
 
-    def dispatch(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        if request.user != self.object.author:
-            return render(request, 'blog/pages/not_allowed.html')
-        return super().dispatch(request, *args, **kwargs)
-
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.author
