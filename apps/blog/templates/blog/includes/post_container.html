@@ -8,6 +8,9 @@
       {% if request.user.is_authenticated and request.user == post.author %}
         <span class="badge bg-primary fs-6 align-middle ms-2">Мой пост</span>
       {% endif %}
+      {% if request.user.is_authenticated and request.user in post.viewed_by_users.all %}
+        <span class="badge bg-info text-dark fs-6 align-middle ms-2">Просмотрено</span>
+      {% endif %}
     </h2>
     
     <p class="mb-2">Категория: <a href="{{ post.category.get_absolute_url }}" class="text-decoration-none fw-medium">{{ post.category.name }}</a></p>

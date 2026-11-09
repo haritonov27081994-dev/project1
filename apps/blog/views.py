@@ -58,7 +58,7 @@ class TagPostsView(ListView):
 
 
 class PostDetailView(DetailView):
-    """Страница детального просмотра одного поста по его слагу с защитой черновиков и уникальными просмотрами."""
+    """Страница детального просмотра одного поста по его слагу с фиксацией пользователей."""
     model = Post
     slug_url_kwarg = 'post_slug'
     template_name = 'blog/pages/post_detail.html'
@@ -72,18 +72,19 @@ class PostDetailView(DetailView):
         return Post.objects.filter(status="published")
 
     def get_object(self, queryset=None):
-        # Получаем сам объект поста из базы данных
         post = super().get_object(queryset)
+        user = self.request.user
         session_key = f'post_{post.id}_viewed'
         
-        # Защита от накрутки: если еще не смотрели в этой сессии И зашел не автор поста
-        if not self.request.session.get(session_key, False) and post.author != self.request.user:
-            # Безопасно увеличиваем счетчик на уровне самой базы данных (F-выражение)
+        # Общий инкремент просмотров (для анонимов и первой сессии)
+        if not self.request.session.get(session_key, False) and post.author != user:
             Post.objects.filter(id=post.id).update(views=F("views") + 1)
-            # Синхронизируем значение у текущего объекта в памяти, чтобы шаблон сразу вывел +1
             post.views += 1
-            # Запоминаем в сессии браузера, что этот пост пользователь уже видел
             self.request.session[session_key] = True
+            
+        # Фиксация авторизованного пользователя в ManyToMany связь
+        if user.is_authenticated and user != post.author:
+            post.viewed_by_users.add(user)
             
         return post
 
