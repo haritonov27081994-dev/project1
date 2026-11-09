@@ -5,6 +5,7 @@ from django.contrib.auth.views import LoginView as AuthLoginView, LogoutView as 
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView
+from django.views.generic.list import MultipleObjectMixin
 
 User = get_user_model()
 
@@ -32,17 +33,25 @@ class LogoutView(AuthLogoutView):
     next_page = reverse_lazy('blog:home_page')
 
 
-class ProfileView(DetailView):
-    """Страница профиля пользователя со списком его постов из урока (с поддержкой верстки)."""
+class ProfileView(DetailView, MultipleObjectMixin):
+    """Страница профиля пользователя с пагинацией его постов по уроку."""
     model = User
     slug_url_kwarg = 'username'
     slug_field = 'username'
     template_name = 'users/pages/profile.html'
+    paginate_by = 4  # Выводим по 4 поста на страницу профиля
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Добавляем список постов автора с твоей сортировкой (от новых к старым)
-        context['posts'] = self.object.posts.all().order_by('-created_at')
-        # Сохраняем имя переменной profile_user для идеальной стабильности твоих шаблонов
+        # Получаем посты автора с сортировкой от новых к старым
+        posts = self.object.posts.all().order_by('-created_at')
+        
+        # Передаем список в MultipleObjectMixin для пагинации
+        context = super().get_context_data(object_list=posts, **kwargs)
+        
+        # Перекладываем запагинированные объекты в привычную переменную posts
+        context['posts'] = context['object_list']
+        del context['object_list']
+        
+        # Сохраняем profile_user для стабильности твоих HTML-шаблонов
         context['profile_user'] = self.object
         return context

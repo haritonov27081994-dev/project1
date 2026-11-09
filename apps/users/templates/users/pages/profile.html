@@ -26,6 +26,9 @@
       {% empty %}
         <p class="text-muted fs-5">Постов ещё нет. Загляните позже!</p>
       {% endfor %}
+      
+      {# Подключаем блок постраничной навигации для постов автора #}
+      {% include "blog/includes/pagination.html" %}
     </div>
   </div>
 </div>
