@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from django.db.models import Q
+from django.db.models import F, Q
 from .models import Post, Category, Tag
 from .forms import PostForm
 
@@ -17,15 +17,15 @@ class HomePageView(ListView):
 
 
 class PostListView(ListView):
-    """Страница со списком всех опубликованных постов с пагинацией из урока."""
+    """Страница со списком всех опубликованных постов."""
     queryset = Post.objects.filter(status="published").order_by('-created_at')
     context_object_name = 'posts'
     template_name = 'blog/pages/post_list.html'
-    paginate_by = 3  # Количество постов на одной странице
+    paginate_by = 3
 
 
 class CategoryPostsView(ListView):
-    """Страница со списком постов конкретной категории с пагинацией."""
+    """Страница со списком постов конкретной категории."""
     context_object_name = 'posts'
     template_name = 'blog/pages/category_posts.html'
     paginate_by = 3
@@ -41,7 +41,7 @@ class CategoryPostsView(ListView):
 
 
 class TagPostsView(ListView):
-    """Страница со списком постов с определенным тегом с пагинацией."""
+    """Страница со списком постов с определенным тегом."""
     model = Post
     template_name = 'blog/pages/tag_posts.html'
     context_object_name = 'posts'
@@ -58,7 +58,7 @@ class TagPostsView(ListView):
 
 
 class PostDetailView(DetailView):
-    """Страница детального просмотра одного поста по его слагу с защитой черновиков из урока."""
+    """Страница детального просмотра одного поста по его слагу с защитой черновиков и уникальными просмотрами."""
     model = Post
     slug_url_kwarg = 'post_slug'
     template_name = 'blog/pages/post_detail.html'
@@ -71,9 +71,25 @@ class PostDetailView(DetailView):
             )
         return Post.objects.filter(status="published")
 
+    def get_object(self, queryset=None):
+        # Получаем сам объект поста из базы данных
+        post = super().get_object(queryset)
+        session_key = f'post_{post.id}_viewed'
+        
+        # Защита от накрутки: если еще не смотрели в этой сессии И зашел не автор поста
+        if not self.request.session.get(session_key, False) and post.author != self.request.user:
+            # Безопасно увеличиваем счетчик на уровне самой базы данных (F-выражение)
+            Post.objects.filter(id=post.id).update(views=F("views") + 1)
+            # Синхронизируем значение у текущего объекта в памяти, чтобы шаблон сразу вывел +1
+            post.views += 1
+            # Запоминаем в сессии браузера, что этот пост пользователь уже видел
+            self.request.session[session_key] = True
+            
+        return post
+
 
 class PostAddView(LoginRequiredMixin, CreateView):
-    """Страница добавления нового поста из урока."""
+    """Страница добавления нового поста."""
     form_class = PostForm
     extra_context = {
         "title": "Добавить пост",
