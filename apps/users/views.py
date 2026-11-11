@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView as AuthLoginView, LogoutView as AuthLogoutView
@@ -19,7 +20,7 @@ class RegisterView(CreateView):
 
 
 class LoginView(AuthLoginView):
-    """Вход в аккаунт по логину или email."""
+    """Вход в аккаунт по логину или email с уведомлением при ошибке."""
     template_name = 'users/pages/login.html'
     authentication_form = CustomAuthenticationForm
 
@@ -28,6 +29,10 @@ class LoginView(AuthLoginView):
         if next_url == settings.DEFAULT_LOGIN_REDIRECT_URL:
             return reverse_lazy(next_url, kwargs={'username': self.request.user.username})
         return next_url
+
+    def form_invalid(self, form):
+        messages.warning(self.request, 'Ошибка входа!')
+        return super().form_invalid(form)
 
 
 class LogoutView(AuthLogoutView):
