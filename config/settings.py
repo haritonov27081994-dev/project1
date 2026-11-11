@@ -146,3 +146,7 @@ mimetypes.add_type("text/javascript", ".js", True)
 LOGIN_URL = 'users:login'
 
 DEFAULT_LOGIN_REDIRECT_URL = 'users:profile'
+
+AUTHENTICATION_BACKENDS = [
+    'apps.users.auth_backend.EmailOrUsernameBackend',
+]
