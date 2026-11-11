@@ -61,6 +61,31 @@ class TagPostsView(ListView):
         return context
 
 
+class PostsSearchView(ListView):
+    """Страница поиска постов по заголовку, тексту, категориям и тегам."""
+    template_name = "blog/pages/posts_search.html"
+    context_object_name = 'posts'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_performed'] = any(self.request.GET.keys())
+        return context
+
+    def get_queryset(self):
+        search_query = self.request.GET.get("q")
+        if search_query:
+            queryset = Post.objects.filter(status="published").order_by("-created_at")
+            condition = Q(title__icontains=search_query) | Q(text__icontains=search_query)
+            search_in_categories = self.request.GET.get("in_categories") == 'on'
+            search_in_tags = self.request.GET.get("in_tags") == 'on'
+            if search_in_categories:
+                condition |= Q(category__name__icontains=search_query)
+            if search_in_tags:
+                condition |= Q(tags__name__icontains=search_query)
+            return queryset.filter(condition).distinct()
+        return Post.objects.none()
+
+
 class PostDetailView(DetailView):
     """Страница детального просмотра одного поста с фиксацией просмотров и реакций."""
     model = Post

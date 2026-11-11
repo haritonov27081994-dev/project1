@@ -48,6 +48,16 @@
               </a>
             </li>
             <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.url_name == 'posts_search' %}active{% endif %}" 
+                 href="{% url 'blog:posts_search' %}">
+                {% if request.resolver_match.url_name == 'posts_search' %}
+                  {% bs_icon 'search-heart-fill' extra_classes='me-1' %}
+                {% else %}
+                  {% bs_icon 'search-heart' extra_classes='me-1' %}
+                {% endif %}Найти пост
+              </a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link {% if request.resolver_match.url_name == 'post_add' %}active{% endif %}" 
                  href="{% url 'blog:post_add' %}">
                 {% if request.resolver_match.url_name == 'post_add' %}
