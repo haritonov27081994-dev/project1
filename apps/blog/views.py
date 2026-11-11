@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import F, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
@@ -22,11 +23,38 @@ class HomePageView(ListView):
 
 
 class PostListView(ListView):
-    """Страница со списком всех опубликованных постов."""
-    queryset = Post.objects.filter(status="published").order_by('-created_at')
+    """Страница со списком всех опубликованных постов с бесконечной прокруткой."""
     context_object_name = 'posts'
     template_name = 'blog/pages/post_list.html'
-    paginate_by = 3
+    posts_per_batch = 4
+
+    def get_queryset(self):
+        self.posts_queryset = Post.objects.filter(status="published").order_by('-created_at')
+        return self.posts_queryset[:PostListView.posts_per_batch]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["has_more_posts"] = self.posts_queryset.count() > PostListView.posts_per_batch
+        context["posts_per_batch"] = PostListView.posts_per_batch
+        return context
+
+
+def load_more_posts_view(request):
+    """AJAX-подгрузка следующей порции постов при прокрутке."""
+    offset = int(request.GET.get("offset", 0))
+    posts_queryset = Post.objects.filter(status="published").order_by('-created_at')
+    posts = posts_queryset[offset:offset + PostListView.posts_per_batch]
+    posts_html = ''.join(
+        [
+            render_to_string("blog/includes/post_container.html", {"post": post}, request)
+            for post in posts
+        ]
+    )
+    has_more_posts = offset + PostListView.posts_per_batch < posts_queryset.count()
+    return JsonResponse({
+        'html': posts_html,
+        'has_more': has_more_posts
+    })
 
 
 class CategoryPostsView(ListView):
@@ -239,18 +267,3 @@ def post_dislike_toggle_view(request, post_id):
     user = request.user
     has_disliked = post.disliked_by_users.filter(id=user.id).exists()
     has_liked = post.liked_by_users.filter(id=user.id).exists()
-    if has_disliked:
-        post.disliked_by_users.remove(user)
-        has_disliked = False
-    else:
-        post.disliked_by_users.add(user)
-        has_disliked = True
-        if has_liked:
-            post.liked_by_users.remove(user)
-            has_liked = False
-    return JsonResponse({
-        'dislikes_count': post.disliked_by_users.count(),
-        'likes_count': post.liked_by_users.count(),
-        'has_liked': has_liked,
-        'has_disliked': has_disliked
-    })
