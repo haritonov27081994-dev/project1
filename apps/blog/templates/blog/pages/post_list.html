@@ -1,7 +1,7 @@
 {% extends "blog/base.html" %}
 {% load static %}
 
-{% block page_title %}CryBloga | Все посты{% endblock %}
+{% block page_title %}{{ block.super }} | Все посты{% endblock page_title %}
 
 {% block styles %}
   <link rel="stylesheet" href="{% static 'blog/css/pages/post_list.css' %}">
@@ -24,4 +24,4 @@
     {% include "blog/includes/pagination.html" %}
   </div>
 </div>
-{% endblock %}
+{% endblock page_content %}
