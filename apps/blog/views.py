@@ -19,7 +19,12 @@ class HomePageView(ListView):
     context_object_name = 'posts'
 
     def get_queryset(self):
-        return Post.objects.filter(status="published").order_by('-created_at')[:5]
+        return (
+            Post.objects.filter(status="published")
+            .select_related('category', 'author')
+            .prefetch_related('tags', 'viewed_by_users')
+            .order_by('-created_at')[:5]
+        )
 
 
 class PostListView(ListView):
@@ -29,7 +34,12 @@ class PostListView(ListView):
     posts_per_batch = 4
 
     def get_queryset(self):
-        self.posts_queryset = Post.objects.filter(status="published").order_by('-created_at')
+        self.posts_queryset = (
+            Post.objects.filter(status="published")
+            .select_related('category', 'author')
+            .prefetch_related('tags', 'viewed_by_users')
+            .order_by('-created_at')
+        )
         return self.posts_queryset[:PostListView.posts_per_batch]
 
     def get_context_data(self, **kwargs):
@@ -42,7 +52,12 @@ class PostListView(ListView):
 def load_more_posts_view(request):
     """AJAX-подгрузка следующей порции постов при прокрутке."""
     offset = int(request.GET.get("offset", 0))
-    posts_queryset = Post.objects.filter(status="published").order_by('-created_at')
+    posts_queryset = (
+        Post.objects.filter(status="published")
+        .select_related('category', 'author')
+        .prefetch_related('tags', 'viewed_by_users')
+        .order_by('-created_at')
+    )
     posts = posts_queryset[offset:offset + PostListView.posts_per_batch]
     posts_html = ''.join(
         [
@@ -65,7 +80,12 @@ class CategoryPostsView(ListView):
 
     def get_queryset(self):
         self.category = get_object_or_404(Category, slug=self.kwargs['category_slug'])
-        return self.category.posts.filter(status='published').order_by('-created_at')
+        return (
+            self.category.posts.filter(status='published')
+            .select_related('category', 'author')
+            .prefetch_related('tags', 'viewed_by_users')
+            .order_by('-created_at')
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -82,7 +102,12 @@ class TagPostsView(ListView):
 
     def get_queryset(self):
         self.tag = get_object_or_404(Tag, slug=self.kwargs['tag_slug'])
-        return self.tag.posts.filter(status='published').order_by('-created_at')
+        return (
+            self.tag.posts.filter(status='published')
+            .select_related('category', 'author')
+            .prefetch_related('tags', 'viewed_by_users')
+            .order_by('-created_at')
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -104,7 +129,12 @@ class PostsSearchView(ListView):
     def get_queryset(self):
         search_query = self.request.GET.get("q")
         if search_query:
-            queryset = Post.objects.filter(status="published").order_by("-created_at")
+            queryset = (
+                Post.objects.filter(status="published")
+                .select_related('category', 'author')
+                .prefetch_related('tags', 'viewed_by_users')
+                .order_by("-created_at")
+            )
             condition = Q(title__icontains=search_query) | Q(text__icontains=search_query)
             search_in_categories = self.request.GET.get("in_categories") == 'on'
             search_in_tags = self.request.GET.get("in_tags") == 'on'
@@ -124,11 +154,12 @@ class PostDetailView(DetailView):
     context_object_name = 'post'
 
     def get_queryset(self):
+        base_qs = Post.objects.select_related('category', 'author').prefetch_related('tags')
         if self.request.user.is_authenticated:
-            return Post.objects.filter(
+            return base_qs.filter(
                 Q(status="published") | Q(author=self.request.user)
             )
-        return Post.objects.filter(status="published")
+        return base_qs.filter(status="published")
 
     def get_object(self, queryset=None):
         post = super().get_object(queryset)
@@ -267,3 +298,18 @@ def post_dislike_toggle_view(request, post_id):
     user = request.user
     has_disliked = post.disliked_by_users.filter(id=user.id).exists()
     has_liked = post.liked_by_users.filter(id=user.id).exists()
+    if has_disliked:
+        post.disliked_by_users.remove(user)
+        has_disliked = False
+    else:
+        post.disliked_by_users.add(user)
+        has_disliked = True
+        if has_liked:
+            post.liked_by_users.remove(user)
+            has_liked = False
+    return JsonResponse({
+        'dislikes_count': post.disliked_by_users.count(),
+        'likes_count': post.liked_by_users.count(),
+        'has_liked': has_liked,
+        'has_disliked': has_disliked
+    })

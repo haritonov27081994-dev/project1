@@ -150,3 +150,14 @@ DEFAULT_LOGIN_REDIRECT_URL = 'users:profile'
 AUTHENTICATION_BACKENDS = [
     'apps.users.auth_backend.EmailOrUsernameBackend',
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+# Правильные имена настроек для пакета django-bootstrap-icons!
+BS_ICONS_CACHE = os.path.join(BASE_DIR, 'icon_cache')
+
