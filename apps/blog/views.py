@@ -1,10 +1,14 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.urls import reverse_lazy
 from django.db.models import F, Q
-from .models import Post, Category, Tag
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
+from django.views.decorators.http import require_POST
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+
 from .forms import PostForm
+from .models import Category, Post, Tag
+
 
 class HomePageView(ListView):
     """Главная страница блога (показывает 5 последних опубликованных постов)."""
@@ -58,7 +62,7 @@ class TagPostsView(ListView):
 
 
 class PostDetailView(DetailView):
-    """Страница детального просмотра одного поста по его слагу с фиксацией пользователей."""
+    """Страница детального просмотра одного поста с фиксацией просмотров и реакций."""
     model = Post
     slug_url_kwarg = 'post_slug'
     template_name = 'blog/pages/post_detail.html'
@@ -76,17 +80,28 @@ class PostDetailView(DetailView):
         user = self.request.user
         session_key = f'post_{post.id}_viewed'
         
-        # Общий инкремент просмотров (для анонимов и первой сессии)
         if not self.request.session.get(session_key, False) and post.author != user:
             Post.objects.filter(id=post.id).update(views=F("views") + 1)
             post.views += 1
             self.request.session[session_key] = True
             
-        # Фиксация авторизованного пользователя в ManyToMany связь
         if user.is_authenticated and user != post.author:
             post.viewed_by_users.add(user)
             
         return post
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        post = self.object
+        context['is_liked'] = False
+        context['is_disliked'] = False
+        if user.is_authenticated:
+            context['is_liked'] = post.liked_by_users.filter(id=user.id).exists()
+            context['is_disliked'] = post.disliked_by_users.filter(id=user.id).exists()
+        context['likes_count'] = post.liked_by_users.count()
+        context['dislikes_count'] = post.disliked_by_users.count()
+        return context
 
 
 class PostAddView(LoginRequiredMixin, CreateView):
@@ -159,3 +174,55 @@ class PostRemoveView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
+
+
+@require_POST
+def post_like_toggle_view(request, post_id):
+    """Переключение лайка поста через AJAX."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Требуется авторизация'}, status=401)
+    post = get_object_or_404(Post, id=post_id)
+    user = request.user
+    has_liked = post.liked_by_users.filter(id=user.id).exists()
+    has_disliked = post.disliked_by_users.filter(id=user.id).exists()
+    if has_liked:
+        post.liked_by_users.remove(user)
+        has_liked = False
+    else:
+        post.liked_by_users.add(user)
+        has_liked = True
+        if has_disliked:
+            post.disliked_by_users.remove(user)
+            has_disliked = False
+    return JsonResponse({
+        'likes_count': post.liked_by_users.count(),
+        'dislikes_count': post.disliked_by_users.count(),
+        'has_liked': has_liked,
+        'has_disliked': has_disliked
+    })
+
+
+@require_POST
+def post_dislike_toggle_view(request, post_id):
+    """Переключение дизлайка поста через AJAX."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Требуется авторизация'}, status=401)
+    post = get_object_or_404(Post, id=post_id)
+    user = request.user
+    has_disliked = post.disliked_by_users.filter(id=user.id).exists()
+    has_liked = post.liked_by_users.filter(id=user.id).exists()
+    if has_disliked:
+        post.disliked_by_users.remove(user)
+        has_disliked = False
+    else:
+        post.disliked_by_users.add(user)
+        has_disliked = True
+        if has_liked:
+            post.liked_by_users.remove(user)
+            has_liked = False
+    return JsonResponse({
+        'dislikes_count': post.disliked_by_users.count(),
+        'likes_count': post.liked_by_users.count(),
+        'has_liked': has_liked,
+        'has_disliked': has_disliked
+    })

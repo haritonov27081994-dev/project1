@@ -12,4 +12,6 @@ urlpatterns = [
     path('posts/<slug:post_slug>/', views.PostDetailView.as_view(), name='post_detail'),
     path('posts/<int:post_id>/edit/', views.PostEditView.as_view(), name="post_edit"),
     path('posts/<int:post_id>/remove/', views.PostRemoveView.as_view(), name="post_remove"),
+    path('posts/<int:post_id>/like/', views.post_like_toggle_view, name="post_like"),
+    path('posts/<int:post_id>/dislike/', views.post_dislike_toggle_view, name="post_dislike"),
 ]

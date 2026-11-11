@@ -1,9 +1,14 @@
 {% extends "blog/base.html" %}
 {% load bootstrap_icons %}
+{% load static %}
 
 {% block page_title %}
   CryBloga | {{ post.title }}
 {% endblock page_title %}
+
+{% block scripts %}
+  <script src="{% static 'blog/js/reactions.js' %}" type="module" defer></script>
+{% endblock scripts %}
 
 {% block page_content %}
   <h2>ID поста: {{ post.id }}</h2>
@@ -31,6 +36,44 @@
   <p>{{ post.text }}</p>
   <p>Дата создания поста: <span class="date-field">{{ post.created_at|date:"c" }}</span></p>
   <p>Дата последнего изменения поста: <span class="date-field">{{ post.updated_at|date:"c" }}</span></p>
+
+  <!-- Блок интерактивных лайков и дизлайков -->
+  <div
+    id="postReactions"
+    class="my-3"
+    data-is-authenticated="{% if request.user.is_authenticated %}true{% else %}false{% endif %}"
+    data-login-url="{% url 'users:login' %}"
+  >
+    <!-- Кнопка Лайка -->
+    <button
+      id="likeBtn"
+      class="btn btn-sm {% if is_liked %}btn-primary{% else %}btn-outline-primary{% endif %} {% if request.user == post.author %}disabled{% endif %} js-reaction-btn"
+      data-url="{% url 'blog:post_like' post.id %}"
+    >
+      <span class="js-icon-fill {% if not is_liked %}d-none{% endif %}">
+        {% bs_icon 'hand-thumbs-up-fill' %}
+      </span>
+      <span class="js-icon-empty {% if is_liked %}d-none{% endif %}">
+        {% bs_icon 'hand-thumbs-up' %}
+      </span>
+      <span id="likesCount">{{ likes_count }}</span>
+    </button>
+
+    <!-- Кнопка Дизлайка -->
+    <button
+      id="dislikeBtn"
+      class="btn btn-sm {% if is_disliked %}btn-danger{% else %}btn-outline-danger{% endif %} {% if request.user == post.author %}disabled{% endif %} js-reaction-btn"
+      data-url="{% url 'blog:post_dislike' post.id %}"
+    >
+      <span class="js-icon-fill {% if not is_disliked %}d-none{% endif %}">
+        {% bs_icon 'hand-thumbs-down-fill' %}
+      </span>
+      <span class="js-icon-empty {% if is_disliked %}d-none{% endif %}">
+        {% bs_icon 'hand-thumbs-down' %}
+      </span>
+      <span id="dislikesCount">{{ dislikes_count }}</span>
+    </button>
+  </div>
 
   <p>
     Автор поста:
