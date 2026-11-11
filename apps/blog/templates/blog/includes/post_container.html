@@ -1,34 +1,60 @@
 {% load bootstrap_icons %}
-<div class="card shadow-sm mb-4 border-0 bg-light">
-  <div class="card-body p-4">
-    <h2 class="card-title h4 fw-semibold mb-3">
-      <a href="{{ post.get_absolute_url }}" class="text-dark text-decoration-none">
-        Заголовок поста: <span class="text-secondary">{{ post.title }}</span>
+
+<div class="card post-card mb-4 shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <h2 class="card-title h4 mb-0">
+        <a href="{{ post.get_absolute_url }}" class="text-decoration-none text-dark">
+          {{ post.title }}
+        </a>
+      </h2>
+
+      <div class="d-flex gap-2">
+        {% if request.user == post.author and request.resolver_match.url_name != 'profile' %}
+          <span class="badge bg-primary border border-primary border-opacity-25">
+            {% bs_icon 'person-fill' extra_classes='me-1' %}
+            Мой пост
+          </span>
+        {% endif %}
+
+        {% if request.user.is_authenticated and request.user in post.viewed_by_users.all %}
+          <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+            {% bs_icon 'eye-fill' extra_classes='me-1' %}
+            Просмотрено
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Категория -->
+    <div class="mb-2">
+      <a href="{{ post.category.get_absolute_url }}" class="badge bg-primary bg-opacity-10 text-primary text-decoration-none">
+        {{ post.category }}
       </a>
-      {% if request.user.is_authenticated and request.user == post.author %}
-        <span class="badge bg-primary fs-6 align-middle ms-2">Мой пост</span>
-      {% endif %}
-      {% if request.user.is_authenticated and request.user in post.viewed_by_users.all %}
-        <span class="badge bg-info text-dark fs-6 align-middle ms-2">Просмотрено</span>
-      {% endif %}
-    </h2>
-    
-    <p class="mb-2">Категория: <a href="{{ post.category.get_absolute_url }}" class="text-decoration-none fw-medium">{{ post.category.name }}</a></p>
+    </div>
 
-    <p class="mb-3 text-secondary small">
-      Теги:
-      {% if post.tags.exists %}
+    <!-- Теги -->
+    {% if post.tags.exists %}
+      <div class="mb-3">
         {% for tag in post.tags.all %}
-          <a href="{{ tag.get_absolute_url }}" class="badge bg-secondary text-decoration-none me-1 fw-normal">{{ tag }}</a>
+          <a href="{{ tag.get_absolute_url }}" class="badge bg-secondary bg-opacity-10 text-secondary text-decoration-none me-1">
+            {{ tag }}
+          </a>
         {% endfor %}
-      {% else %}
-        <span class="text-muted italic">нет тегов</span>
-      {% endif %}
-    </p>
+      </div>
+    {% endif %}
 
-    <p class="card-text text-dark mb-4 fs-5" style="line-height: 1.6;">{{ post.text }}</p>
-    <div class="d-flex justify-content-between align-items-center pt-3 border-top text-secondary small">
-      <span>Дата создания поста: <span class="date-field">{{ post.created_at|date:"c" }}</span></span>
+    <!-- Текст поста -->
+    <div class="card-text mb-3">
+      <p class="mb-0">{{ post.text|truncatechars:500 }}</p>
+    </div>
+
+    <!-- Дата создания и просмотры -->
+    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top text-muted small">
+      <span>
+        {% bs_icon 'calendar3' extra_classes='me-1' %}
+        <span class="date-field">{{ post.created_at|date:"c" }}</span>
+      </span>
       <span class="d-flex align-items-center">
         {% bs_icon 'eye' extra_classes='me-1' %} {{ post.views }}
       </span>

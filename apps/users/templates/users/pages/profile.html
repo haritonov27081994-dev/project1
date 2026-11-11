@@ -2,7 +2,7 @@
 {% load bootstrap_icons %}
 {% load static %}
 
-{% block page_title %}CryBloga | Профиль{% endblock page_title %}
+{% block page_title %}{{ block.super }} | Профиль{% endblock page_title %}
 
 {% block styles %}
   <link rel="stylesheet" href="{% static 'users/css/pages/profile.css' %}">
@@ -12,25 +12,29 @@
 {% block page_content %}
 <div class="row mt-4">
   <div class="col-md-8 mx-auto">
-    <h1>
+    <h1 class="text-center mb-4">
       {% if profile_user == request.user %}
         Мой профиль
       {% else %}
         Профиль пользователя {{ profile_user }}
       {% endif %}
     </h1>
-    <div class="mt-4">
-      {% for post in posts %}
-        {% if profile_user == request.user or post.status != 'draft' %}
-          {% include 'blog/includes/post_container.html' %}
-        {% endif %}
-      {% empty %}
-        <p class="text-muted fs-5">Постов ещё нет. Загляните позже!</p>
-      {% endfor %}
-      
-      {# Подключаем блок постраничной навигации для постов автора #}
+
+    {% if posts %}
+      <div class="container px-0">
+        {% for post in posts %}
+          {% if profile_user == request.user or post.status != 'draft' %}
+            {% include 'blog/includes/post_container.html' %}
+          {% endif %}
+        {% endfor %}
+      </div>
+
       {% include "blog/includes/pagination.html" %}
-    </div>
+    {% else %}
+      <div class="text-center py-5">
+        <p class="text-muted fs-5">Постов ещё нет. Загляните позже!</p>
+      </div>
+    {% endif %}
   </div>
 </div>
 {% endblock page_content %}
