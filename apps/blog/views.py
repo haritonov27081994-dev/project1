@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import F, Q
 from django.http import JsonResponse
@@ -153,6 +154,7 @@ class PostAddView(LoginRequiredMixin, CreateView):
             )
             post.tags.add(tag)
 
+        messages.success(self.request, 'Пост успешно добавлен!')
         return redirect('blog:post_detail', post_slug=post.slug)
 
 
