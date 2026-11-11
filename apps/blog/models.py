@@ -6,6 +6,7 @@ from unidecode import unidecode
 
 User = get_user_model()
 
+
 class Post(models.Model):
     STATUS_CHOICES = (
         ('published', 'Опубликован'),
@@ -36,6 +37,18 @@ class Post(models.Model):
         related_name='viewed_posts',
         blank=True,
         verbose_name="Просмотрено пользователями"
+    )
+    liked_by_users = models.ManyToManyField(
+        User,
+        related_name="liked_posts",
+        blank=True,
+        verbose_name="Лайки"
+    )
+    disliked_by_users = models.ManyToManyField(
+        User,
+        related_name="disliked_posts",
+        blank=True,
+        verbose_name="Дизлайки"
     )
 
     class Meta:
