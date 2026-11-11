@@ -1,5 +1,6 @@
 from django import forms
-from .models import Post  # Относительный импорт модели
+from .models import Post
+
 
 class PostForm(forms.ModelForm):
     tags_input = forms.CharField(
@@ -36,14 +37,16 @@ class PostForm(forms.ModelForm):
             'category': "- можно выбрать только одну категорию",
         }
 
-    # Валидация заголовка полностью сохраняется
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['category'].empty_label = "- Категория -"
+
     def clean_title(self):
         title = self.cleaned_data['title'].strip()
         if len(title) < 10:
             raise forms.ValidationError("Заголовок не должен быть короче 10 символов.")
         return title
 
-    # Очистка и разбор текстовой строки тегов
     def clean_tags_input(self):
         tags_data = self.cleaned_data.get('tags_input', '')
         tag_names = [
