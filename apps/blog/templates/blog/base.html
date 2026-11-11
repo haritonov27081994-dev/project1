@@ -17,113 +17,121 @@
     <script src="{% static 'blog/js/base.js' %}" type="module" defer></script>
     {% block scripts %}{% endblock scripts %}
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'blog:home_page' %}">CryBloga</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <!-- Левая часть меню -->
-          <ul class="navbar-nav me-auto">
-            <li class="nav-item">
-              <a class="nav-link {% if request.resolver_match.url_name == 'home_page' %}active{% endif %}" 
-                 href="{% url 'blog:home_page' %}">
-                {% if request.resolver_match.url_name == 'home_page' %}
-                  {% bs_icon 'house-fill' extra_classes='me-1' %}
-                {% else %}
-                  {% bs_icon 'house' extra_classes='me-1' %}
-                {% endif %}Главная
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {% if request.resolver_match.url_name == 'post_list' %}active{% endif %}" 
-                 href="{% url 'blog:post_list' %}">
-                {% if request.resolver_match.url_name == 'post_list' %}
-                  {% bs_icon 'file-text-fill' extra_classes='me-1' %}
-                {% else %}
-                  {% bs_icon 'file-text' extra_classes='me-1' %}
-                {% endif %}Все посты
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {% if request.resolver_match.url_name == 'posts_search' %}active{% endif %}" 
-                 href="{% url 'blog:posts_search' %}">
-                {% if request.resolver_match.url_name == 'posts_search' %}
-                  {% bs_icon 'search-heart-fill' extra_classes='me-1' %}
-                {% else %}
-                  {% bs_icon 'search-heart' extra_classes='me-1' %}
-                {% endif %}Найти пост
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {% if request.resolver_match.url_name == 'post_add' %}active{% endif %}" 
-                 href="{% url 'blog:post_add' %}">
-                {% if request.resolver_match.url_name == 'post_add' %}
-                  {% bs_icon 'plus-square-fill' extra_classes='me-1' %}
-                {% else %}
-                  {% bs_icon 'plus-square-dotted' extra_classes='me-1' %}
-                {% endif %}Добавить пост
-              </a>
-            </li>
-          </ul>
-          <!-- Правая часть меню: Авторизация и Выход -->
-          <ul class="navbar-nav align-items-center">
-            {% if request.user.is_authenticated %}
+<body class="d-flex flex-column min-vh-100">
+    <header>
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark rounded-bottom border-bottom border-primary mb-4">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="{% url 'blog:home_page' %}">CryBloga</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Левая часть меню -->
+            <ul class="navbar-nav me-auto">
               <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.url_name == 'profile' and request.resolver_match.kwargs.username == request.user.username %}active{% endif %}" 
-                   href="{% url 'users:profile' username=request.user.username %}">
-                  {% if request.resolver_match.url_name == 'profile' and request.resolver_match.kwargs.username == request.user.username %}
-                    {% bs_icon 'person-fill' extra_classes='me-1' %}
+                <a class="nav-link {% if request.resolver_match.url_name == 'home_page' %}active{% endif %}" 
+                   href="{% url 'blog:home_page' %}">
+                  {% if request.resolver_match.url_name == 'home_page' %}
+                    {% bs_icon 'house-fill' extra_classes='me-1' %}
                   {% else %}
-                    {% bs_icon 'person' extra_classes='me-1' %}
-                  {% endif %}{{ request.user }}
-                </a>
-              </li>
-              <li class="nav-item ms-2">
-                <form method="POST" action="{% url 'users:logout' %}" class="d-inline">
-                  {% csrf_token %}
-                  <button type="submit" class="btn nav-link border-0 p-0 m-0 align-baseline">
-                    {% bs_icon 'box-arrow-left' extra_classes='me-1' %}Выйти
-                  </button>
-                </form> 
-              </li>
-            {% else %}
-              <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}" 
-                   href="{% url 'users:login' %}">
-                  {% if request.resolver_match.url_name == 'login' %}
-                    {% bs_icon 'door-open-fill' extra_classes='me-1' %}
-                  {% else %}
-                    {% bs_icon 'door-closed' extra_classes='me-1' %}
-                  {% endif %}Войти
+                    {% bs_icon 'house' extra_classes='me-1' %}
+                  {% endif %}Главная
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}" 
-                   href="{% url 'users:register' %}">
-                  {% if request.resolver_match.url_name == 'register' %}
-                    {% bs_icon 'person-fill-add' extra_classes='me-1' %}
+                <a class="nav-link {% if request.resolver_match.url_name == 'post_list' %}active{% endif %}" 
+                   href="{% url 'blog:post_list' %}">
+                  {% if request.resolver_match.url_name == 'post_list' %}
+                    {% bs_icon 'file-text-fill' extra_classes='me-1' %}
                   {% else %}
-                    {% bs_icon 'person-add' extra_classes='me-1' %}
-                  {% endif %}Регистрация
+                    {% bs_icon 'file-text' extra_classes='me-1' %}
+                  {% endif %}Все посты
                 </a>
               </li>
-            {% endif %}
-          </ul>
+              <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'posts_search' %}active{% endif %}" 
+                   href="{% url 'blog:posts_search' %}">
+                  {% if request.resolver_match.url_name == 'posts_search' %}
+                    {% bs_icon 'search-heart-fill' extra_classes='me-1' %}
+                  {% else %}
+                    {% bs_icon 'search-heart' extra_classes='me-1' %}
+                  {% endif %}Найти пост
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'post_add' %}active{% endif %}" 
+                   href="{% url 'blog:post_add' %}">
+                  {% if request.resolver_match.url_name == 'post_add' %}
+                    {% bs_icon 'plus-square-fill' extra_classes='me-1' %}
+                  {% else %}
+                    {% bs_icon 'plus-square-dotted' extra_classes='me-1' %}
+                  {% endif %}Добавить пост
+                </a>
+              </li>
+            </ul>
+            <!-- Правая часть меню: Авторизация и Выход -->
+            <ul class="navbar-nav align-items-center">
+              {% if request.user.is_authenticated %}
+                <li class="nav-item">
+                  <a class="nav-link {% if request.resolver_match.url_name == 'profile' and request.resolver_match.kwargs.username == request.user.username %}active{% endif %}" 
+                     href="{% url 'users:profile' username=request.user.username %}">
+                    {% if request.resolver_match.url_name == 'profile' and request.resolver_match.kwargs.username == request.user.username %}
+                      {% bs_icon 'person-fill' extra_classes='me-1' %}
+                    {% else %}
+                      {% bs_icon 'person' extra_classes='me-1' %}
+                    {% endif %}{{ request.user }}
+                  </a>
+                </li>
+                <li class="nav-item ms-2">
+                  <form method="POST" action="{% url 'users:logout' %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn nav-link border-0 p-0 m-0 align-baseline">
+                      {% bs_icon 'box-arrow-left' extra_classes='me-1' %}Выйти
+                    </button>
+                  </form> 
+                </li>
+              {% else %}
+                <li class="nav-item">
+                  <a class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}" 
+                     href="{% url 'users:login' %}">
+                    {% if request.resolver_match.url_name == 'login' %}
+                      {% bs_icon 'door-open-fill' extra_classes='me-1' %}
+                    {% else %}
+                      {% bs_icon 'door-closed' extra_classes='me-1' %}
+                    {% endif %}Войти
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}" 
+                     href="{% url 'users:register' %}">
+                    {% if request.resolver_match.url_name == 'register' %}
+                      {% bs_icon 'person-fill-add' extra_classes='me-1' %}
+                    {% else %}
+                      {% bs_icon 'person-add' extra_classes='me-1' %}
+                    {% endif %}Регистрация
+                  </a>
+                </li>
+              {% endif %}
+            </ul>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
 
-    <div class="container">
+    <div class="container flex-grow-1 mb-4">
         <main>
           {% block page_content %}
           {% endblock page_content %}
         </main>
     </div>
 
-    <footer>&copy; Все права защищены 2026</footer>
+    <footer class="bg-dark text-white rounded-top border-top border-primary py-3 mt-auto">
+      <div class="container-fluid">
+        <div class="text-center">
+          &copy; Все права защищены 2026
+        </div>
+      </div>
+    </footer>
 
     <!-- Динамическая кнопка прокрутки наверх -->
     <button id="scrollToTopBtn" class="scroll-to-top disabled">
