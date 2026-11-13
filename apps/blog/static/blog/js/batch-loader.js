@@ -1,4 +1,5 @@
 import { getAction } from "./utils.js"
+import { formatDatesInHTML } from "./format-dates.js"
 
 class BatchLoader {
   constructor(containerId) {
@@ -32,7 +33,10 @@ class BatchLoader {
       const data = await getAction(`${this.loadMoreUrl}?offset=${this.offset}`)
       if (!data) return
 
-      this.container.insertAdjacentHTML("beforeend", data.html)
+      // Форматируем даты в подгруженных карточках
+      const html = formatDatesInHTML(data.html)
+
+      this.container.insertAdjacentHTML("beforeend", html)
       this.offset += this.batchSize
       this.hasMore = data.has_more
     } catch (error) {

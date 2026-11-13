@@ -7,4 +7,15 @@ export function formatDate(el) {
   }
 }
 
-document.querySelectorAll(".date-field").forEach(formatDate)
+export function formatDatesInHTML(htmlString) {
+  const tempDiv = document.createElement('div')
+  tempDiv.innerHTML = htmlString
+  tempDiv.querySelectorAll(".date-field").forEach(el => {
+    formatDate(el)
+  })
+  return tempDiv.innerHTML
+}
+
+document.querySelectorAll(".date-field").forEach(el => {
+  formatDate(el)
+})
