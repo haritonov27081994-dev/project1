@@ -152,6 +152,7 @@ class PostDetailView(DetailView):
     slug_url_kwarg = 'post_slug'
     template_name = 'blog/pages/post_detail.html'
     context_object_name = 'post'
+    comments_per_batch = 5
 
     def get_queryset(self):
         base_qs = (
@@ -190,7 +191,13 @@ class PostDetailView(DetailView):
             context['is_disliked'] = post.disliked_by_users.filter(id=user.id).exists()
         context['likes_count'] = post.liked_by_users.count()
         context['dislikes_count'] = post.disliked_by_users.count()
+
+        comments_queryset = post.comments.select_related('author').all()
+        context["comments"] = comments_queryset[:self.comments_per_batch]
+        context["has_more_comments"] = comments_queryset.count() > self.comments_per_batch
+        context["comments_per_batch"] = self.comments_per_batch
         return context
+
 
 
 
@@ -360,4 +367,22 @@ def add_comment_view(request, post_id):
         'success': True,
         'comment_html': comment_html,
         'comments_count': post.comments.count()
+    })
+
+def load_more_comments_view(request, post_id):
+    """AJAX-подгрузка следующей порции комментариев к посту."""
+    offset = int(request.GET.get("offset", 0))
+    post = get_object_or_404(Post, id=post_id)
+    comments_queryset = post.comments.select_related('author').all()
+    comments = comments_queryset[offset:offset + PostDetailView.comments_per_batch]
+    comments_html = ''.join(
+        [
+            render_to_string("blog/includes/comment_container.html", {"comment": comment}, request)
+            for comment in comments
+        ]
+    )
+    has_more_comments = offset + PostDetailView.comments_per_batch < comments_queryset.count()
+    return JsonResponse({
+        'html': comments_html,
+        'has_more': has_more_comments
     })

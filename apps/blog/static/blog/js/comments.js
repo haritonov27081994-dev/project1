@@ -33,6 +33,11 @@ if (commentFormElement) {
           formatDate(dateElement)
         }
 
+        // Увеличиваем offset на 1, так как добавили новый комментарий в начало списка
+        if (window.commentsBatchLoader) {
+          window.commentsBatchLoader.offset += 1
+        }
+
         const commentsTitleElement = document.querySelector('#commentsTitle')
         commentsTitleElement.textContent = `Комментарии (${data.comments_count})`
       } else {

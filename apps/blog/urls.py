@@ -18,4 +18,5 @@ urlpatterns = [
     path('posts/<int:post_id>/dislike/', views.post_dislike_toggle_view, name="post_dislike"),
     path('posts/<int:post_id>/toggle-favorite/', views.post_favorite_toggle_view, name="post_favorite_toggle"),
     path("posts/<int:post_id>/comments/add/", views.add_comment_view, name="add_comment"),
+    path('posts/<int:post_id>/comments/load-more/', views.load_more_comments_view, name="load_more_comments"),
 ]
