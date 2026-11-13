@@ -192,11 +192,13 @@ class PostDetailView(DetailView):
         context['likes_count'] = post.liked_by_users.count()
         context['dislikes_count'] = post.disliked_by_users.count()
 
-        comments_queryset = post.comments.select_related('author').all()
+        # Берем только корневые комментарии (без родителей)
+        comments_queryset = post.comments.filter(parent__isnull=True).select_related('author')
         context["comments"] = comments_queryset[:self.comments_per_batch]
         context["has_more_comments"] = comments_queryset.count() > self.comments_per_batch
         context["comments_per_batch"] = self.comments_per_batch
         return context
+
 
 
 
@@ -346,17 +348,25 @@ def post_favorite_toggle_view(request, post_id):
 
 @require_POST
 def add_comment_view(request, post_id):
-    """Добавление комментария к посту через AJAX."""
+    """Добавление комментария или ответа на комментарий через AJAX."""
     if not request.user.is_authenticated:
         return JsonResponse({'success': False, 'error': 'Требуется авторизация'}, status=401)
     post = get_object_or_404(Post, id=post_id)
     text = request.POST.get('text', '').strip()
+    parent_id = request.POST.get('parent_id')
+
     if not text:
         return JsonResponse({'success': False, 'error': 'Комментарий не может быть пустым.'})
+
+    parent_comment = None
+    if parent_id:
+        parent_comment = get_object_or_404(Comment, id=parent_id, post=post)
+
     comment = Comment.objects.create(
         post=post,
         author=request.user,
-        text=text
+        text=text,
+        parent=parent_comment
     )
     comment_html = render_to_string(
         'blog/includes/comment_container.html',
@@ -369,11 +379,12 @@ def add_comment_view(request, post_id):
         'comments_count': post.comments.count()
     })
 
+
 def load_more_comments_view(request, post_id):
-    """AJAX-подгрузка следующей порции комментариев к посту."""
+    """AJAX-подгрузка следующей порции корневых комментариев к посту."""
     offset = int(request.GET.get("offset", 0))
     post = get_object_or_404(Post, id=post_id)
-    comments_queryset = post.comments.select_related('author').all()
+    comments_queryset = post.comments.filter(parent__isnull=True).select_related('author')
     comments = comments_queryset[offset:offset + PostDetailView.comments_per_batch]
     comments_html = ''.join(
         [

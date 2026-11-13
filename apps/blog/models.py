@@ -129,10 +129,25 @@ class Tag(models.Model):
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments", verbose_name="Пост")
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments", verbose_name="Автор")
-    text = models.TextField(verbose_name="Текст")
+    text = models.TextField(verbose_name='Текст')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="replies",
+        verbose_name="Родительский комментарий"
+    )
 
     def __str__(self):
+        if self.parent:
+            parent_text = self.parent.text[:20] + '...' if len(self.parent.text) > 20 else self.parent.text
+            reply_text = self.text[:20] + '...' if len(self.text) > 20 else self.text
+            return (
+                f'Ответ от {self.author} на комментарий пользователя {self.parent.author}: '
+                f'комм. "{parent_text}", отв. "{reply_text}"'
+            )
         preview = self.text if len(self.text) < 20 else self.text[:20] + '...'
         return f'Комментарий от {self.author} к посту "{self.post}": {preview}'
 
