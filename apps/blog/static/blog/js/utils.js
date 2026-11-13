@@ -22,14 +22,17 @@ export async function getAction(url) {
   return await response.json();
 }
 
-export async function postAction(url) {
-  const response = await fetch(url, {
+export async function postAction(url, body = null) {
+  const options = {
     method: "POST",
     headers: {
       "X-CSRFToken": getCookie("csrftoken"),
-      "Content-Type": "application/json",
     },
-  });
+  };
+  if (body) {
+    options.body = body;
+  }
+  const response = await fetch(url, options);
   if (!response.ok) {
     console.error("Request failed", response.status);
     return null;

@@ -7,9 +7,9 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
-
 from .forms import PostForm
-from .models import Category, Post, Tag
+from .models import Category, Comment, Post, Tag
+
 
 
 class HomePageView(ListView):
@@ -147,14 +147,17 @@ class PostsSearchView(ListView):
 
 
 class PostDetailView(DetailView):
-    """Страница детального просмотра одного поста с фиксацией просмотров и реакций."""
+    """Страница детального просмотра одного поста с фиксацией просмотров, реакций и комментариев."""
     model = Post
     slug_url_kwarg = 'post_slug'
     template_name = 'blog/pages/post_detail.html'
     context_object_name = 'post'
 
     def get_queryset(self):
-        base_qs = Post.objects.select_related('category', 'author').prefetch_related('tags')
+        base_qs = (
+            Post.objects.select_related('category', 'author')
+            .prefetch_related('tags', 'bookmarked_by_users', 'comments__author')
+        )
         if self.request.user.is_authenticated:
             return base_qs.filter(
                 Q(status="published") | Q(author=self.request.user)
@@ -188,6 +191,7 @@ class PostDetailView(DetailView):
         context['likes_count'] = post.liked_by_users.count()
         context['dislikes_count'] = post.disliked_by_users.count()
         return context
+
 
 
 class PostAddView(LoginRequiredMixin, CreateView):
@@ -330,4 +334,30 @@ def post_favorite_toggle_view(request, post_id):
     return JsonResponse({
         'is_favorite': is_favorite,
         'favorites_count': post.bookmarked_by_users.count()
+    })
+
+
+@require_POST
+def add_comment_view(request, post_id):
+    """Добавление комментария к посту через AJAX."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Требуется авторизация'}, status=401)
+    post = get_object_or_404(Post, id=post_id)
+    text = request.POST.get('text', '').strip()
+    if not text:
+        return JsonResponse({'success': False, 'error': 'Комментарий не может быть пустым.'})
+    comment = Comment.objects.create(
+        post=post,
+        author=request.user,
+        text=text
+    )
+    comment_html = render_to_string(
+        'blog/includes/comment_container.html',
+        {'comment': comment},
+        request=request
+    )
+    return JsonResponse({
+        'success': True,
+        'comment_html': comment_html,
+        'comments_count': post.comments.count()
     })

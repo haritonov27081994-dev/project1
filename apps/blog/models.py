@@ -124,3 +124,19 @@ class Tag(models.Model):
 
     def __str__(self):
         return f'#{self.name}'
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments", verbose_name="Пост")
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments", verbose_name="Автор")
+    text = models.TextField(verbose_name="Текст")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+
+    def __str__(self):
+        preview = self.text if len(self.text) < 20 else self.text[:20] + '...'
+        return f'Комментарий от {self.author} к посту "{self.post}": {preview}'
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'комментарий'
+        verbose_name_plural = "комментарии"
