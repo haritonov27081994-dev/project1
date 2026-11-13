@@ -9,16 +9,23 @@
   <link rel="stylesheet" href="{% static 'blog/css/includes/post_container.css' %}">
 {% endblock styles %}
 
+{% block scripts %}
+  <script src="{% static 'blog/js/favorites.js' %}" type="module" defer></script>
+{% endblock scripts %}
+
 {% block page_content %}
 <div class="row mt-4">
   <div class="col-md-8 mx-auto">
-    <h1 class="text-center mb-4">
-      {% if profile_user == request.user %}
-        Мой профиль
-      {% else %}
-        Профиль пользователя {{ profile_user }}
-      {% endif %}
-    </h1>
+    {% if profile_user == request.user %}
+      <h1 class="text-center mb-3">Мой профиль</h1>
+      <div class="text-center mb-4">
+        <a href="{% url 'users:favorite_posts' %}" class="btn btn-outline-primary">
+          Посмотреть избранные посты
+        </a>
+      </div>
+    {% else %}
+      <h1 class="text-center mb-4">Профиль пользователя {{ profile_user }}</h1>
+    {% endif %}
 
     {% if posts %}
       <div class="container px-0">

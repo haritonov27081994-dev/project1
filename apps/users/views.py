@@ -2,9 +2,10 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as AuthLoginView, LogoutView as AuthLogoutView
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView
+from django.views.generic import CreateView, DetailView, ListView
 from django.views.generic.list import MultipleObjectMixin
 
 from .forms import CustomAuthenticationForm
@@ -40,6 +41,21 @@ class LogoutView(AuthLogoutView):
     next_page = reverse_lazy('blog:home_page')
 
 
+class FavoritePostsView(LoginRequiredMixin, ListView):
+    """Страница со списком избранных постов текущего пользователя."""
+    template_name = 'users/pages/favorite_posts.html'
+    context_object_name = "posts"
+    paginate_by = 2
+
+    def get_queryset(self):
+        return (
+            self.request.user.bookmarked_posts.filter(status="published")
+            .select_related('category', 'author')
+            .prefetch_related('tags', 'viewed_by_users', 'bookmarked_by_users')
+            .order_by('-created_at')
+        )
+
+
 class ProfileView(DetailView, MultipleObjectMixin):
     """Страница профиля пользователя с пагинацией его постов."""
     model = User
@@ -49,7 +65,12 @@ class ProfileView(DetailView, MultipleObjectMixin):
     paginate_by = 4
 
     def get_context_data(self, **kwargs):
-        posts = self.object.posts.all().order_by('-created_at')
+        posts = (
+            self.object.posts.all()
+            .select_related('category', 'author')
+            .prefetch_related('tags', 'viewed_by_users', 'bookmarked_by_users')
+            .order_by('-created_at')
+        )
         context = super().get_context_data(object_list=posts, **kwargs)
         context['posts'] = context['object_list']
         del context['object_list']

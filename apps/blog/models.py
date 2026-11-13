@@ -50,6 +50,12 @@ class Post(models.Model):
         blank=True,
         verbose_name="Дизлайки"
     )
+    bookmarked_by_users = models.ManyToManyField(
+        User,
+        related_name="bookmarked_posts",
+        blank=True,
+        verbose_name="В избранном у"
+    )
 
     class Meta:
         ordering = ['-created_at']

@@ -1,0 +1,30 @@
+{% extends "blog/base.html" %}
+{% load static %}
+
+{% block page_title %}{{ block.super }} | Избранные посты{% endblock page_title %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static 'blog/css/includes/post_container.css' %}">
+{% endblock styles %}
+
+{% block scripts %}
+  <script src="{% static 'blog/js/favorites.js' %}" type="module" defer></script>
+{% endblock scripts %}
+
+{% block page_content %}
+<div class="row mt-4">
+  <div class="col-md-8 mx-auto">
+    <h1 class="text-center mb-4">Избранные посты</h1>
+    
+    <div class="container px-0" data-page-type="favorite-posts">
+      {% for post in posts %}
+        {% include 'blog/includes/post_container.html' %}
+      {% empty %}
+        <p class="text-center text-muted fs-5">Пока нет избранных постов.</p>
+      {% endfor %}
+      
+      {% include "blog/includes/pagination.html" %}
+    </div>
+  </div>
+</div>
+{% endblock page_content %}

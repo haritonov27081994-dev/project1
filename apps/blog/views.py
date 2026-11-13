@@ -22,7 +22,7 @@ class HomePageView(ListView):
         return (
             Post.objects.filter(status="published")
             .select_related('category', 'author')
-            .prefetch_related('tags', 'viewed_by_users')
+            .prefetch_related('tags', 'viewed_by_users', 'bookmarked_by_users')
             .order_by('-created_at')[:5]
         )
 
@@ -37,7 +37,7 @@ class PostListView(ListView):
         self.posts_queryset = (
             Post.objects.filter(status="published")
             .select_related('category', 'author')
-            .prefetch_related('tags', 'viewed_by_users')
+            .prefetch_related('tags', 'viewed_by_users', 'bookmarked_by_users')
             .order_by('-created_at')
         )
         return self.posts_queryset[:PostListView.posts_per_batch]
@@ -55,7 +55,7 @@ def load_more_posts_view(request):
     posts_queryset = (
         Post.objects.filter(status="published")
         .select_related('category', 'author')
-        .prefetch_related('tags', 'viewed_by_users')
+        .prefetch_related('tags', 'viewed_by_users', 'bookmarked_by_users')
         .order_by('-created_at')
     )
     posts = posts_queryset[offset:offset + PostListView.posts_per_batch]
@@ -83,7 +83,7 @@ class CategoryPostsView(ListView):
         return (
             self.category.posts.filter(status='published')
             .select_related('category', 'author')
-            .prefetch_related('tags', 'viewed_by_users')
+            .prefetch_related('tags', 'viewed_by_users', 'bookmarked_by_users')
             .order_by('-created_at')
         )
 
@@ -105,7 +105,7 @@ class TagPostsView(ListView):
         return (
             self.tag.posts.filter(status='published')
             .select_related('category', 'author')
-            .prefetch_related('tags', 'viewed_by_users')
+            .prefetch_related('tags', 'viewed_by_users', 'bookmarked_by_users')
             .order_by('-created_at')
         )
 
@@ -132,7 +132,7 @@ class PostsSearchView(ListView):
             queryset = (
                 Post.objects.filter(status="published")
                 .select_related('category', 'author')
-                .prefetch_related('tags', 'viewed_by_users')
+                .prefetch_related('tags', 'viewed_by_users', 'bookmarked_by_users')
                 .order_by("-created_at")
             )
             condition = Q(title__icontains=search_query) | Q(text__icontains=search_query)
@@ -312,4 +312,22 @@ def post_dislike_toggle_view(request, post_id):
         'likes_count': post.liked_by_users.count(),
         'has_liked': has_liked,
         'has_disliked': has_disliked
+    })
+
+
+@require_POST
+def post_favorite_toggle_view(request, post_id):
+    """Добавление или удаление поста из избранного через AJAX."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Требуется авторизация'}, status=401)
+    post = get_object_or_404(Post, id=post_id)
+    if request.user in post.bookmarked_by_users.all():
+        post.bookmarked_by_users.remove(request.user)
+        is_favorite = False
+    else:
+        post.bookmarked_by_users.add(request.user)
+        is_favorite = True
+    return JsonResponse({
+        'is_favorite': is_favorite,
+        'favorites_count': post.bookmarked_by_users.count()
     })
