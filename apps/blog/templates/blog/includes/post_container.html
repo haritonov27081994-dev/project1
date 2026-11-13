@@ -49,12 +49,18 @@
       <p class="mb-0">{{ post.text|truncatechars:500 }}</p>
     </div>
 
-    <!-- Дата создания, просмотры и избранное -->
+    <!-- Дата создания, комментарии, просмотры и избранное -->
     <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center text-muted small">
-      <span>
-        {% bs_icon 'calendar3' extra_classes='me-1' %}
-        <span class="date-field">{{ post.created_at|date:"c" }}</span>
-      </span>
+      <div>
+        <span>
+          {% bs_icon 'calendar3' extra_classes='me-1' %}
+          <span class="date-field">{{ post.created_at|date:"c" }}</span>
+        </span>
+        <span class="ms-3">
+          {% bs_icon 'chat-text' extra_classes='me-1' %}
+          {{ post.comments.count }}
+        </span>
+      </div>
 
       <div class="d-flex align-items-center gap-3">
         <span class="d-flex align-items-center">
